@@ -37,7 +37,7 @@ export default defineComponent({})
     <div class="title">FluidPay Guardian</div>
     <div class="menu">
       <a target="_blank" href="http://github.com/fluidpay/fluidpay-guardian">
-        <img height="20" alt="Github Logomark" :src="'./docs/images/github.png'" />
+        <img height="20" alt="Github Logomark" :src="'./src/docs/images/github.png'" />
       </a>
     </div>
   </div>

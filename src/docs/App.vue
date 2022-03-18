@@ -1,6 +1,7 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import Header from './header.vue'
+import guardian from '../guardian/guardian'
 
 export default defineComponent({
   components: {
@@ -12,6 +13,9 @@ export default defineComponent({
     }
   },  
   setup() {
+    const g = new guardian({
+      api_key: 'pub_0wUsHIlrkK1I6ADno5MfT10UjhR'
+    })
   }
 })
 </script>
@@ -20,9 +24,6 @@ export default defineComponent({
   @import './scss/_variables.scss';
 
   .container {
-    input {
-      border-radius: 4px; // Just to test fp-money border radius override
-    }
     .bluebar {
       position: absolute;
       top: -350px;
@@ -63,7 +64,15 @@ export default defineComponent({
     <div class="orangebar"></div>
     <div class="app">
       <Header></Header>
-      <div>{{hello}}</div>
+      <div>
+        <pre>
+          <code class="language-javascript">
+            const g = new guardian({
+              api_key: '8675309'
+            })
+          </code>
+        </pre>
+      </div>
     </div>
   </div>
 </template>
