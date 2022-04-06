@@ -5,6 +5,6 @@ export interface Event {
 }
 
 export interface EventData {
-    event_name: string
-    event_data: Record<string, any>
+    type: string
+    action: Record<string, any>
 }

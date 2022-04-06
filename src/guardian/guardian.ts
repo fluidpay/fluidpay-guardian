@@ -10,11 +10,13 @@ export default class Guardian {
     private readonly apiKey: string
     private readonly url: string
     private readonly clearPeriod: number
-    private interval?: NodeJS.Timer
+    private readonly type: string;
+    private interval?: ReturnType<typeof setTimeout>
 
     constructor(builder: GuardianBuilder) {
         this.apiKey = builder.apiKey
         this.url = builder.url
+        this.type = builder.type
         this.clearPeriod = builder.clearPeriod || 36000
         this.interval = undefined
         // TODO validate fields
@@ -31,7 +33,9 @@ export default class Guardian {
             if (itemsPresent) {
                 results.push(...(JSON.parse(itemsPresent) as Event[]))
             }
-            localStorage.setItem(localStorageKey, JSON.stringify(results))
+            if (results.length) {
+                localStorage.setItem(localStorageKey, JSON.stringify(results))
+            }
         })
     }
 
@@ -41,7 +45,7 @@ export default class Guardian {
         }, this.clearPeriod)
     }
 
-    sendData(): Promise<Response|Error> {
+    sendData(id: string): Promise<Response> {
         if (this.interval) {
             clearInterval(this.interval)
         }
@@ -59,8 +63,14 @@ export default class Guardian {
                     'Content-Type': 'application/json',
                     'Authorization': this.apiKey
                 },
-                body: body
+                body: JSON.stringify({
+                    belongs_to_type: this.type,
+                    belongs_to_id: id,
+                    events: JSON.parse(body)
+                })
             })
-        }).finally(this.restartInterval)
+        }).finally(() => {
+            this.restartInterval()
+        })
     }
 }

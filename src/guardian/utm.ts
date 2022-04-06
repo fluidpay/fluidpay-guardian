@@ -8,8 +8,8 @@ const processUtm = (): Promise<Event>[] => {
     return Object.entries(queryString.parse(location.search))
         .filter(([k]) => supportedUtmKeys.includes(k))
         .map(([k, v]) => ({
-            event_name: k,
-            event_data: {
+            type: k + '_detected',
+            action: {
                 value: v
             }
         } as EventData))
