@@ -1,0 +1,9 @@
+{   
+    "$schema": "https://unpkg.com/@changesets/config@2.0.0/schema.json",
+    "changelog": ["../scripts/changelog-github-custom.cjs", { "repo": "fluidpay/fluidpay-guardian" }],
+    "commit": false,
+    "linked": [],
+    "access": "public",
+    "baseBranch": "master",
+    "updateInternalDependencies": "patch"
+}

@@ -4,6 +4,7 @@
     "version": "0.0.0",
     "scripts": {
         "build": "tsc && vite build",
+        "changes:add": "npx changeset",
         "dev": "vite",
         "eslint": "eslint --ext .js,.ts,.svelte .",
         "eslint:fix": "eslint --fix",
@@ -12,19 +13,28 @@
         "prettier": "prettier",
         "prettier:check": "prettier --check --plugin-search-dir=. .",
         "prettier:fix": "prettier --write --plugin-search-dir=. .",
-        "preview": "vite preview"
+        "preview": "vite preview",
+        "release:package": "cd dist && npm publish",
+        "ts": "tsc --noEmit"
     },
     "devDependencies": {
         "@babel/core": "^7.17.8",
         "@babel/preset-env": "^7.16.11",
+        "@changesets/cli": "^2.22.0",
+        "@changesets/get-github-info": "^0.5.0",
+        "@changesets/types": "^5.0.0",
         "@types/node": "^17.0.23",
         "@typescript-eslint/eslint-plugin": "^5.18.0",
         "@typescript-eslint/parser": "^5.18.0",
+        "dotenv": "^16.0.0",
         "eslint": "^8.12.0",
         "eslint-config-prettier": "^8.5.0",
         "path": "^0.12.7",
         "prettier": "^2.6.2",
         "typescript": "^4.6.3",
         "vite": "^2.9.1"
+    },
+    "dependencies": {
+        "query-string": "^7.1.1"
     }
 }
