@@ -1,0 +1,10 @@
+.svelte-kit
+static
+build
+dist
+node_modules
+coverage
+package
+CHANGELOG.md
+.changeset
+.github
