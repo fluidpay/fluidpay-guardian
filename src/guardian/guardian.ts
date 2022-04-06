@@ -35,7 +35,7 @@ export default class Guardian {
         })
     }
 
-    restartInterval() {
+    private restartInterval() {
         this.interval = setInterval(() => {
             localStorage.removeItem(localStorageKey)
         }, this.clearPeriod)
