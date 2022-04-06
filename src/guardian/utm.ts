@@ -9,7 +9,6 @@ const processUtm = (): Promise<Event>[] => {
         .filter(([k]) => supportedUtmKeys.includes(k))
         .map(([k, v]) => ({
             event_name: k,
-            created_at: new Date().getTime(),
             event_data: {
                 value: v
             }
@@ -17,6 +16,7 @@ const processUtm = (): Promise<Event>[] => {
         .map(async (ed) => {
             return {
                 hash: await hash(ed),
+                created_at: new Date().getTime(),
                 data: ed
             } as Event
         })

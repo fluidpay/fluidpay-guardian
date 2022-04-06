@@ -17,4 +17,6 @@ export default class Guardian {
             localStorage.setItem(localStorageKey, JSON.stringify(results))
         })
     }
+
+    sendData() {}
 }
