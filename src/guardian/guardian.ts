@@ -1,15 +1,39 @@
 import {Event} from "../models/events.interface";
 import {getLocalStorage} from "./helper";
-import addUTMListeners from "./utm";
+import {utmCampaignListener, utmContent, utmMediumListener, utmSourceListener, utmTerm} from "./utm";
 
 export const localStorageKey = 'fp-guardian-results';
 export const defaultClearPeriod = 108000
 
 export default class Guardian {
-    process() {
-        console.log('entrypoint')
+    private readonly utmSourceObserver: MutationObserver;
+    private readonly utmMediumObserver: MutationObserver;
+    private readonly utmCampaignObserver: MutationObserver;
+    private readonly utmTermObserver: MutationObserver;
+    private readonly utmContentObserver: MutationObserver;
 
-        addUTMListeners()
+    constructor() {
+        this.utmSourceObserver = new MutationObserver(utmSourceListener)
+        this.utmMediumObserver = new MutationObserver(utmMediumListener)
+        this.utmCampaignObserver = new MutationObserver(utmCampaignListener)
+        this.utmTermObserver = new MutationObserver(utmTerm)
+        this.utmContentObserver = new MutationObserver(utmContent)
+    }
+
+    process() {
+        this.utmSourceObserver.observe(document, {subtree: true, childList: true});
+        this.utmMediumObserver.observe(document, {subtree: true, childList: true});
+        this.utmCampaignObserver.observe(document, {subtree: true, childList: true});
+        this.utmTermObserver.observe(document, {subtree: true, childList: true});
+        this.utmContentObserver.observe(document, {subtree: true, childList: true});
+    }
+
+    disconnect() {
+        this.utmSourceObserver.disconnect()
+        this.utmMediumObserver.disconnect()
+        this.utmCampaignObserver.disconnect()
+        this.utmTermObserver.disconnect()
+        this.utmContentObserver .disconnect()
     }
 
     getData(): Event[] {

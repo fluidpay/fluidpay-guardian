@@ -3,25 +3,57 @@ import {Event, EventData} from "../models/events.interface";
 import {getLocalStorage, hash, setLocalStorage, updateLocalStorage} from "./helper";
 import {defaultClearPeriod, localStorageKey} from "./guardian";
 
-const supportedUtmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content']
 const utmSuffix = "_last"
+const previousElementTTL = 10800000
 
-const addUTMListeners = () => {
-    supportedUtmKeys.forEach((v) => {
-        addUTMListener(v)
-    })
+const utmSourceListener = () => {
+    const key = 'utm_source'
+    const lastUTM = getLocalStorage(key + utmSuffix)
+    const utmParam = queryString.parse(location.search)[key]
+    if (utmParam && typeof utmParam === 'string') {
+        setLocalStorage(key + utmSuffix, utmParam, previousElementTTL)
+        onUrlChange(key, lastUTM, utmParam)
+    }
 }
 
-const addUTMListener = (key: string) => {
-    new MutationObserver(() => {
+const utmMediumListener = () => {
+    const key = 'utm_medium'
+    const lastUTM = getLocalStorage(key + utmSuffix)
+    const utmParam = queryString.parse(location.search)[key]
+    if (utmParam && typeof utmParam === 'string') {
+        setLocalStorage(key + utmSuffix, utmParam, previousElementTTL)
+        onUrlChange(key, lastUTM, utmParam)
+    }
+}
 
-        const lastUTM = getLocalStorage(key + utmSuffix)
-        const utmParam = queryString.parse(location.search)[key]
-        if (utmParam && typeof utmParam === 'string') {
-            setLocalStorage(key + utmSuffix, utmParam, 10800000)
-            onUrlChange(key, lastUTM, utmParam)
-        }
-    }).observe(document, {subtree: true, childList: true});
+const utmCampaignListener = () => {
+    const key = 'utm_campaign'
+    const lastUTM = getLocalStorage(key + utmSuffix)
+    const utmParam = queryString.parse(location.search)[key]
+    if (utmParam && typeof utmParam === 'string') {
+        setLocalStorage(key + utmSuffix, utmParam, previousElementTTL)
+        onUrlChange(key, lastUTM, utmParam)
+    }
+}
+
+const utmTerm = () => {
+    const key = 'utm_term'
+    const lastUTM = getLocalStorage(key + utmSuffix)
+    const utmParam = queryString.parse(location.search)[key]
+    if (utmParam && typeof utmParam === 'string') {
+        setLocalStorage(key + utmSuffix, utmParam, previousElementTTL)
+        onUrlChange(key, lastUTM, utmParam)
+    }
+}
+
+const utmContent = () => {
+    const key = 'utm_content'
+    const lastUTM = getLocalStorage(key + utmSuffix)
+    const utmParam = queryString.parse(location.search)[key]
+    if (utmParam && typeof utmParam === 'string') {
+        setLocalStorage(key + utmSuffix, utmParam, previousElementTTL)
+        onUrlChange(key, lastUTM, utmParam)
+    }
 }
 
 const onUrlChange = (key: string, lastUtm: string | null, utmParam: string) => {
@@ -53,4 +85,4 @@ const onUrlChange = (key: string, lastUtm: string | null, utmParam: string) => {
     })
 }
 
-export default addUTMListeners
+export {utmSourceListener,utmMediumListener,utmCampaignListener,utmTerm,utmContent}
