@@ -23,8 +23,5 @@
         "src/**/*.ts",
         "scripts/**/*.ts"
     ],
-    "exclude": [
-        "scripts/*",
-        "src/sift/sift.js"
-    ]
+    "exclude": ["scripts/*", "src/sift/sift.js"]
 }

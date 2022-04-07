@@ -1,9 +1,15 @@
-import {Event} from "../models/events.interface";
-import {getLocalStorage} from "./helper";
-import {utmCampaignListener, utmContent, utmMediumListener, utmSourceListener, utmTerm} from "./utm";
+import { Event } from '../models/events.interface';
+import { getLocalStorage } from './helper';
+import {
+    utmCampaignListener,
+    utmContent,
+    utmMediumListener,
+    utmSourceListener,
+    utmTerm
+} from './utm';
 
 export const localStorageKey = 'fp-guardian-results';
-export const defaultClearPeriod = 1_800_000
+export const defaultClearPeriod = 1_800_000;
 
 class Guardian {
     private readonly utmSourceObserver: MutationObserver;
@@ -13,36 +19,36 @@ class Guardian {
     private readonly utmContentObserver: MutationObserver;
 
     constructor() {
-        this.utmSourceObserver = new MutationObserver(utmSourceListener)
-        this.utmMediumObserver = new MutationObserver(utmMediumListener)
-        this.utmCampaignObserver = new MutationObserver(utmCampaignListener)
-        this.utmTermObserver = new MutationObserver(utmTerm)
-        this.utmContentObserver = new MutationObserver(utmContent)
+        this.utmSourceObserver = new MutationObserver(utmSourceListener);
+        this.utmMediumObserver = new MutationObserver(utmMediumListener);
+        this.utmCampaignObserver = new MutationObserver(utmCampaignListener);
+        this.utmTermObserver = new MutationObserver(utmTerm);
+        this.utmContentObserver = new MutationObserver(utmContent);
     }
 
     process() {
-        this.utmSourceObserver.observe(document, {subtree: true, childList: true});
-        this.utmMediumObserver.observe(document, {subtree: true, childList: true});
-        this.utmCampaignObserver.observe(document, {subtree: true, childList: true});
-        this.utmTermObserver.observe(document, {subtree: true, childList: true});
-        this.utmContentObserver.observe(document, {subtree: true, childList: true});
+        this.utmSourceObserver.observe(document, { subtree: true, childList: true });
+        this.utmMediumObserver.observe(document, { subtree: true, childList: true });
+        this.utmCampaignObserver.observe(document, { subtree: true, childList: true });
+        this.utmTermObserver.observe(document, { subtree: true, childList: true });
+        this.utmContentObserver.observe(document, { subtree: true, childList: true });
     }
 
     disconnect() {
-        this.utmSourceObserver.disconnect()
-        this.utmMediumObserver.disconnect()
-        this.utmCampaignObserver.disconnect()
-        this.utmTermObserver.disconnect()
-        this.utmContentObserver .disconnect()
+        this.utmSourceObserver.disconnect();
+        this.utmMediumObserver.disconnect();
+        this.utmCampaignObserver.disconnect();
+        this.utmTermObserver.disconnect();
+        this.utmContentObserver.disconnect();
     }
 }
 
 const getGuardianData = (): Event[] => {
-    const values = getLocalStorage(localStorageKey)
+    const values = getLocalStorage(localStorageKey);
     if (!values) {
-        return [] as Event[]
+        return [] as Event[];
     }
-    return Object.values(values)
-}
+    return Object.values(values);
+};
 
-export {Guardian, getGuardianData}
+export { Guardian, getGuardianData };

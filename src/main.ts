@@ -1,3 +1,3 @@
-import {Guardian} from "./guardian/guardian";
+import { Guardian } from './guardian/guardian';
 
-new Guardian().process()
+new Guardian().process();

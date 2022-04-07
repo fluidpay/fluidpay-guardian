@@ -1,6 +1,6 @@
 export interface GuardianBuilder {
-    url: string
-    apiKey: string
-    type: string
-    clearPeriod?: number
+    url: string;
+    apiKey: string;
+    type: string;
+    clearPeriod?: number;
 }
