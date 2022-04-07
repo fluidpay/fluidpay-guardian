@@ -6,7 +6,7 @@ export default defineConfig({
         lib: {
             entry: path.resolve(__dirname, 'src/main.ts'),
             name: 'FluidPay Guardian',
-            fileName: (format) => `index.${format}.js`
+            fileName: (format) => `guardian.${format}.js`
         }
     }
 });

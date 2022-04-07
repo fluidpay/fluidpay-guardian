@@ -74,9 +74,9 @@ const onUrlChange = (key: string, lastUtm: string | null, utmParam: string) => {
             data: eventData
         } as Event
         updateLocalStorage(localStorageKey, (v: string | null) => {
-            let result = {} as any
+            let result = {} as Record<string, any>
             if (v) {
-                const parsed = JSON.parse(v) as { expr: number; value: any }
+                const parsed = JSON.parse(v) as { expr: number; value: Record<string, any> }
                 result = parsed.value
             }
             result[h] = event

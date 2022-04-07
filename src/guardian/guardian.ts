@@ -5,7 +5,7 @@ import {utmCampaignListener, utmContent, utmMediumListener, utmSourceListener, u
 export const localStorageKey = 'fp-guardian-results';
 export const defaultClearPeriod = 108000
 
-export default class Guardian {
+class Guardian {
     private readonly utmSourceObserver: MutationObserver;
     private readonly utmMediumObserver: MutationObserver;
     private readonly utmCampaignObserver: MutationObserver;
@@ -35,13 +35,14 @@ export default class Guardian {
         this.utmTermObserver.disconnect()
         this.utmContentObserver .disconnect()
     }
-
-    getData(): Event[] {
-        const values = getLocalStorage(localStorageKey)
-        if (!values) {
-            return [] as Event[]
-        }
-        const parsed = JSON.parse(values) as { [key: string]: Event }
-        return Object.values(parsed)
-    }
 }
+
+const getGuardianData = (): Event[] => {
+    const values = getLocalStorage(localStorageKey)
+    if (!values) {
+        return [] as Event[]
+    }
+    return Object.values(values)
+}
+
+export {Guardian, getGuardianData}
