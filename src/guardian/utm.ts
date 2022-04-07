@@ -13,8 +13,7 @@ const addUTMListeners = () => {
 }
 
 const addUTMListener = (key: string) => {
-    const callback = () => {
-        console.log('evemt listener')
+    new MutationObserver(() => {
 
         const lastUTM = getLocalStorage(key + utmSuffix)
         const utmParam = queryString.parse(location.search)[key]
@@ -22,14 +21,15 @@ const addUTMListener = (key: string) => {
             setLocalStorage(key + utmSuffix, utmParam, 10800000)
             onUrlChange(key, lastUTM, utmParam)
         }
-    }
-    callback()
-    new MutationObserver(callback).observe(document, {subtree: true, childList: true});
+    }).observe(document, {subtree: true, childList: true});
 }
 
 const onUrlChange = (key: string, lastUtm: string | null, utmParam: string) => {
+    if (lastUtm && lastUtm === utmParam) {
+        return
+    }
     const eventData = {
-        type: !lastUtm ? key + '_detected' : key + 'changed',
+        type: !lastUtm ? key + '_detected' : key + '_changed',
         action: {
             value: utmParam
         }
@@ -42,13 +42,13 @@ const onUrlChange = (key: string, lastUtm: string | null, utmParam: string) => {
             data: eventData
         } as Event
         updateLocalStorage(localStorageKey, (v: string | null) => {
+            let result = {} as any
             if (v) {
-                const parsed = JSON.parse(v) as { expr: number; value: string }
-                const value = JSON.parse(parsed.value)
-                value[h] = event
-                return value
+                const parsed = JSON.parse(v) as { expr: number; value: any }
+                result = parsed.value
             }
-            return event
+            result[h] = event
+            return result
         }, defaultClearPeriod)
     })
 }

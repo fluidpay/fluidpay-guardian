@@ -10,60 +10,52 @@ const hash = async (eventData: EventData): Promise<string> => {
 const localStorageLockTimeout = 10
 
 const setLocalStorage = (key: string, value: Record<string, any> | string, ttl = -1) => {
-    if (!localStorage.getItem(key+'-mutex')) {
-        localStorage.setItem(key+'-mutex', 'true')
-    } else {
-        setTimeout(() => ({}), localStorageLockTimeout)
-        setLocalStorage(key, value, ttl)
-    }
-    let val: string
-    if (typeof value === 'string') {
-        val = value
-    } else {
-        val = JSON.stringify(value)
-    }
-    localStorage.setItem(key, JSON.stringify({expr: ttl + +(new Date()), value: val}))
-    localStorage.removeItem(key+'-mutex')
+    waitUtilUnlocked(key)
+    localStorage.setItem(key, JSON.stringify({expr: ttl + +(new Date()), value: value}))
+    invalidateMutex(key)
 }
 
-const updateLocalStorage = (key: string, update: (v: string|null) => any, ttl = -1) => {
-    if (!localStorage.getItem(key+'-mutex')) {
-        localStorage.setItem(key+'-mutex', 'true')
-    } else {
-        setTimeout(() => ({}), localStorageLockTimeout)
-        updateLocalStorage(key, update, ttl)
-    }
-    let val: string
-    const updated = update(localStorage.getItem(key))
-    if (typeof updated === 'string') {
-        val = updated
-    } else {
-        val = JSON.stringify(updated)
-    }
-    localStorage.setItem(key, JSON.stringify({expr: ttl + +(new Date()), value: val}))
-    localStorage.removeItem(key+'-mutex')
+const updateLocalStorage = (key: string, update: (v: string | null) => any, ttl = -1) => {
+    waitUtilUnlocked(key)
+    localStorage.setItem(key, JSON.stringify({expr: ttl + +(new Date()), value: update(localStorage.getItem(key))}))
+    invalidateMutex(key)
 }
 
-const getLocalStorage = (key: string): string | null => {
-    if (!localStorage.getItem(key+'-mutex')) {
-        localStorage.setItem(key+'-mutex', 'true')
-    } else {
-        setTimeout(() => ({}), localStorageLockTimeout)
-        return getLocalStorage(key)
-    }
-    const item = localStorage.getItem(key);
+const getLocalStorage = (key: string): any => {
+    waitUtilUnlocked(key)
+    const item = localStorage.getItem(key)
     if (!item) {
-        localStorage.removeItem(key+'-mutex')
+        invalidateMutex(key)
         return null
     }
-    const parsed = JSON.parse(item) as { expr: number; value: string };
-    if (parsed.expr >= 0 && parsed.expr > +(new Date())) {
+    const parsed = JSON.parse(item) as { expr: number; value: any }
+    if (parsed.expr >= 0 && parsed.expr < +(new Date())) {
         localStorage.removeItem(key)
-        localStorage.removeItem(key+'-mutex')
+        invalidateMutex(key)
         return null
     }
-    localStorage.removeItem(key+'-mutex')
+    invalidateMutex(key)
     return parsed.value
 }
 
-export {hash, setLocalStorage,updateLocalStorage, getLocalStorage}
+function invalidateMutex(key: string) {
+    localStorage.removeItem(key + '-mutex')
+}
+
+const waitUtilUnlocked = (key: string) => {
+    let i = 0
+    while (true) {
+        if (!localStorage.getItem(key + '-mutex')) {
+            localStorage.setItem(key + '-mutex', 'true')
+            break
+        }
+        setTimeout(() => ({}), localStorageLockTimeout)
+        if (i > 1000) {
+            invalidateMutex(key);
+            throw new Error("local storage timeout exceeded")
+        }
+        i++
+    }
+}
+
+export {hash, setLocalStorage, updateLocalStorage, getLocalStorage}
