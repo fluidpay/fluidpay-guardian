@@ -11,13 +11,13 @@ const localStorageLockTimeout = 10
 
 const setLocalStorage = (key: string, value: Record<string, any> | string, ttl = -1) => {
     waitUtilUnlocked(key)
-    localStorage.setItem(key, JSON.stringify({expr: ttl + +(new Date()), value: value}))
+    localStorage.setItem(key, JSON.stringify({expr: ttl > 0 ? +(new Date(ttl + +(new Date()))) : ttl, value: value}))
     invalidateMutex(key)
 }
 
 const updateLocalStorage = (key: string, update: (v: string | null) => any, ttl = -1) => {
     waitUtilUnlocked(key)
-    localStorage.setItem(key, JSON.stringify({expr: ttl + +(new Date()), value: update(localStorage.getItem(key))}))
+    localStorage.setItem(key, JSON.stringify({expr: ttl > 0 ? +(new Date(ttl + +(new Date()))) : ttl, value: update(localStorage.getItem(key))}))
     invalidateMutex(key)
 }
 

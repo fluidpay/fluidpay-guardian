@@ -3,7 +3,7 @@ import {getLocalStorage} from "./helper";
 import {utmCampaignListener, utmContent, utmMediumListener, utmSourceListener, utmTerm} from "./utm";
 
 export const localStorageKey = 'fp-guardian-results';
-export const defaultClearPeriod = 108000
+export const defaultClearPeriod = 1_800_000
 
 class Guardian {
     private readonly utmSourceObserver: MutationObserver;
