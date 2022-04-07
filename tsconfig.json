@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "useDefineForClassFields": true,
+        "module": "ESNext",
+        "lib": ["ESNext", "DOM"],
+        "moduleResolution": "Node",
+        "strict": true,
+        "sourceMap": true,
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
+        "noEmit": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noImplicitReturns": true,
+        "allowJs": true,
+        "checkJs": true
+    },
+    "include": [
+        "src/**/*.interface.ts",
+        "src/**/*.d.ts",
+        "src/**/*.js",
+        "src/**/*.ts",
+        "scripts/**/*.ts"
+    ],
+    "exclude": ["scripts/*", "src/sift/sift.js"]
+}
