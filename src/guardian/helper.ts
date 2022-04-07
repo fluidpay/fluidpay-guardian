@@ -66,4 +66,4 @@ const getLocalStorage = (key: string): string | null => {
     return parsed.value
 }
 
-export {hash, setLocalStorage, getLocalStorage}
+export {hash, setLocalStorage,updateLocalStorage, getLocalStorage}
