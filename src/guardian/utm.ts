@@ -58,10 +58,8 @@ async function onUrlChange(key: string, param: string, db: IDBPDatabase): Promis
             value: param
         },
     } as EventData
-
     if (lastUtm && lastUtm[lastUtm.length - 1].data.action?.value &&
         window.btoa(JSON.stringify(lastUtm[lastUtm.length - 1].data.action)) === window.btoa(JSON.stringify(eventData.action))) {
-        console.debug('last utm match', key)
         return Promise.resolve()
     }
 
