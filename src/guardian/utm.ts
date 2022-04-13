@@ -61,6 +61,7 @@ async function onUrlChange(key: string, param: string, db: IDBPDatabase): Promis
 
     if (lastUtm && lastUtm[lastUtm.length - 1].data.action?.value &&
         window.btoa(JSON.stringify(lastUtm[lastUtm.length - 1].data.action)) === window.btoa(JSON.stringify(eventData.action))) {
+        console.debug('last utm match', key)
         return Promise.resolve()
     }
 
@@ -70,6 +71,9 @@ async function onUrlChange(key: string, param: string, db: IDBPDatabase): Promis
     const store = tx.objectStore(DATA_STORE)
 
     const lastIndex = await store.get(GUARDIAN_INDEX_KEY)
+    if (Number.isNaN(lastIndex)) {
+        throw new Error("invalid last index")
+    }
 
     const currentLatestHash = await store.get(GUARDIAN_LATEST_HASH_KEY)
     if (latestHash !== currentLatestHash) {

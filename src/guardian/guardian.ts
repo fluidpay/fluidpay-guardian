@@ -11,16 +11,21 @@ class Guardian {
     private utmTermObserver?: MutationObserver;
     private utmContentObserver?: MutationObserver;
 
-    constructor() {
-        this.initMutationObservers();
-    }
+    // constructor() {
+    //     this.initMutationObservers();
+    // }
 
     private initMutationObservers() {
-        this.utmSourceObserver = new MutationObserver(utmSourceListener);
-        this.utmMediumObserver = new MutationObserver(utmMediumListener);
-        this.utmCampaignObserver = new MutationObserver(utmCampaignListener);
-        this.utmTermObserver = new MutationObserver(utmTerm);
-        this.utmContentObserver = new MutationObserver(utmContent);
+        this.utmSourceObserver = new MutationObserver(this.teeFunc(utmSourceListener));
+        this.utmMediumObserver = new MutationObserver(this.teeFunc(utmMediumListener));
+        this.utmCampaignObserver = new MutationObserver(this.teeFunc(utmCampaignListener));
+        this.utmTermObserver = new MutationObserver(this.teeFunc(utmTerm));
+        this.utmContentObserver = new MutationObserver(this.teeFunc(utmContent));
+    }
+
+    teeFunc(func: () => void): () => void {
+        func()
+        return func
     }
 
     process() {
@@ -31,21 +36,22 @@ class Guardian {
         this.utmContentObserver?.observe(document, {subtree: true, childList: true});
     }
 
-    async setSessionID(sessionID: string) {
+    setSessionID(sessionID: string): Promise<any> {
         this.disconnect();
-        await this.cleanIndexedDB().then(() => {
-                connectDB().then((db) => {
+        return this.cleanIndexedDB().then(() => {
+                return connectDB().then((db) => {
                     return Promise.all(
                         [
                             // TODO export constants
-                            db.add(DATA_STORE, sessionID, 'latest_hash'),
-                            db.add(DATA_STORE, 0, 'guardian_index')
+                            db.put(DATA_STORE, sessionID, 'latest_hash'),
+                            db.put(DATA_STORE, 0, 'guardian_index')
                         ]
                     )
                 })
             }
-        )
-        this.initMutationObservers();
+        ).then(() => {
+            this.initMutationObservers();
+        })
     }
 
     cleanIndexedDB(): Promise<void> {
