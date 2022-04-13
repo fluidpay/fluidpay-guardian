@@ -9,14 +9,14 @@ class Guardian {
     private utmContentObserver?: MutationObserver;
 
     private initMutationObservers() {
-        this.utmSourceObserver = new MutationObserver(this.teeFunc(utmSourceListener));
-        this.utmMediumObserver = new MutationObserver(this.teeFunc(utmMediumListener));
-        this.utmCampaignObserver = new MutationObserver(this.teeFunc(utmCampaignListener));
-        this.utmTermObserver = new MutationObserver(this.teeFunc(utmTerm));
-        this.utmContentObserver = new MutationObserver(this.teeFunc(utmContent));
+        this.utmSourceObserver = new MutationObserver(Guardian.teeFunc(utmSourceListener));
+        this.utmMediumObserver = new MutationObserver(Guardian.teeFunc(utmMediumListener));
+        this.utmCampaignObserver = new MutationObserver(Guardian.teeFunc(utmCampaignListener));
+        this.utmTermObserver = new MutationObserver(Guardian.teeFunc(utmTerm));
+        this.utmContentObserver = new MutationObserver(Guardian.teeFunc(utmContent));
     }
 
-    private teeFunc(func: () => void): () => void {
+    private static teeFunc(func: () => void): () => void {
         func()
         return func
     }
@@ -52,7 +52,6 @@ class Guardian {
             ).then(() => {
                 this.initMutationObservers();
             })
-
         })
     }
 
@@ -68,6 +67,17 @@ class Guardian {
         this.utmCampaignObserver?.disconnect();
         this.utmTermObserver?.disconnect();
         this.utmContentObserver?.disconnect();
+    }
+
+    // FIXME this is here for testing
+    public static showResult() {
+        connectDB().then(async (db) => {
+            const keys = (await db.getAllKeys(DATA_STORE)).filter((k) => !['guardian_index', 'latest_hash', 'session_id'].includes(k as string))
+            const joinedEvents = await Promise.all(keys.flatMap(async (key) => {
+                return await db.get(DATA_STORE, key)
+            }))
+            console.log(joinedEvents.flatMap(e => e).sort((a, b) => a.id > b.id ? 1 : -1))
+        })
     }
 }
 

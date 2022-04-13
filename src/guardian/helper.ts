@@ -4,21 +4,52 @@ import {EventData} from '../models/events.interface';
 const dbName = 'fp-guardian-results';
 
 const hash = async (eventData: EventData, previousHash: string): Promise<string> => {
+    let forHash = jsonStringifyOrder(eventData)
+    forHash += previousHash
     const digest = await crypto.subtle.digest(
         'SHA-512',
-        new TextEncoder().encode(JSON.stringify(eventData) + previousHash)
+        new TextEncoder().encode(forHash)
     );
 
-    return window.btoa(unescape(encodeURIComponent(new TextDecoder().decode(digest))));
+    return hex(digest)
 };
+
+function jsonStringifyOrder(obj: unknown) {
+    const allKeys: string[] = [];
+    const seen: Record<string, null> = {};
+    JSON.stringify(obj, function (key: string, value: unknown): unknown {
+        if (!(key in seen)) {
+            allKeys.push(key);
+            seen[key] = null;
+        }
+        return value;
+    });
+    return JSON.stringify(obj, allKeys.sort());
+}
+
+function hex(buffer: ArrayBuffer): string {
+    const hexCodes = [];
+    const view = new DataView(buffer);
+    for (let i = 0; i < view.byteLength; i += 4) {
+        // Using getUint32 reduces the number of iterations needed (we process 4 bytes each time)
+        const value = view.getUint32(i)
+        // toString(16) will give the hex representation of the number without padding
+        const stringValue = value.toString(16)
+        // We use concatenation and slice for padding
+        const padding = '00000000'
+        const paddedValue = (padding + stringValue).slice(-padding.length)
+        hexCodes.push(paddedValue);
+    }
+    // Join all the hex strings into one
+
+    return hexCodes.join("");
+}
 
 const connectDB = (): Promise<IDBPDatabase> => {
     return openDB(dbName, 1, {
         upgrade(db: IDBPDatabase<unknown>) {
-           db.createObjectStore('guardian')
+            db.createObjectStore('guardian')
         }
-    }).then((db) => {
-        return db
     })
 };
 
