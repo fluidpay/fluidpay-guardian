@@ -18,7 +18,6 @@ const connectDB = (): Promise<IDBPDatabase> => {
            db.createObjectStore('guardian')
         }
     }).then((db) => {
-        console.log(db.objectStoreNames)
         return db
     })
 };

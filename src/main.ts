@@ -1,3 +1,6 @@
 import { Guardian } from './guardian/guardian';
 
-new Guardian().process();
+const guardian = new Guardian()
+guardian.setSessionID('ABC')
+guardian.process()
+

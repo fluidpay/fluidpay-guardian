@@ -1,4 +1,5 @@
-import {utmCampaignListener, utmContent, utmMediumListener, utmSourceListener, utmTerm} from './utm';
+import {DATA_STORE, utmCampaignListener, utmContent, utmMediumListener, utmSourceListener, utmTerm} from './utm';
+import {connectDB} from "./helper";
 
 export const localStorageKey = 'fp-guardian-results';
 export const defaultClearPeriod = 1_800_000;
@@ -9,22 +10,9 @@ class Guardian {
     private utmCampaignObserver?: MutationObserver;
     private utmTermObserver?: MutationObserver;
     private utmContentObserver?: MutationObserver;
-    private sessionProxy: ProxyHandler<{ sessionID: string }>;
-    private session?: {
-        sessionID: string
-    };
 
     constructor() {
         this.initMutationObservers();
-        this.sessionProxy = new Proxy<any>(this.session, {
-            set: (target, key, value): boolean => {
-                target[key] = value
-                this.disconnect();
-                this.initMutationObservers();
-                return true
-            }
-        })
-
     }
 
     private initMutationObservers() {
@@ -43,9 +31,27 @@ class Guardian {
         this.utmContentObserver?.observe(document, {subtree: true, childList: true});
     }
 
-    setSessionID(sessionID: string) {
-        this.sessionProxy.apply({sessionID: sessionID})
+    async setSessionID(sessionID: string) {
+        this.disconnect();
+        await this.cleanIndexedDB().then(() => {
+                connectDB().then((db) => {
+                    return Promise.all(
+                        [
+                            // TODO export constants
+                            db.add(DATA_STORE, sessionID, 'latest_hash'),
+                            db.add(DATA_STORE, 0, 'guardian_index')
+                        ]
+                    )
+                })
+            }
+        )
+        this.initMutationObservers();
+    }
 
+    cleanIndexedDB(): Promise<void> {
+        return connectDB().then((db) => {
+            return db.clear(DATA_STORE)
+        })
     }
 
     disconnect() {
