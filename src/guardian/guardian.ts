@@ -30,29 +30,29 @@ class Guardian {
     }
 
     async setSessionID(sessionID: string): Promise<any> {
-       await connectDB().then(async (db) => {
-            const storedSessionID = await db.get(DATA_STORE,'session_id')
-            if (storedSessionID && storedSessionID == sessionID) {
+        await connectDB().then(async (db) => {
+            const storedSessionID = await db.get(DATA_STORE, 'session_id')
+            if (storedSessionID && storedSessionID === sessionID) {
                 this.initMutationObservers();
                 return Promise.resolve()
-            } else {
-                this.disconnect();
-                return this.cleanIndexedDB().then(async () => {
-                    await db.put(DATA_STORE,sessionID,'session_id')
-                        return connectDB().then((db) => {
-                            return Promise.all(
-                                [
-                                    // TODO export constants
-                                    db.put(DATA_STORE, sessionID, 'latest_hash'),
-                                    db.put(DATA_STORE, 0, 'guardian_index')
-                                ]
-                            )
-                        })
-                    }
-                ).then(() => {
-                    this.initMutationObservers();
-                })
             }
+            this.disconnect();
+            return this.cleanIndexedDB().then(async () => {
+                    await db.put(DATA_STORE, sessionID, 'session_id')
+                    return connectDB().then((db) => {
+                        return Promise.all(
+                            [
+                                // TODO export constants
+                                db.put(DATA_STORE, sessionID, 'latest_hash'),
+                                db.put(DATA_STORE, 0, 'guardian_index')
+                            ]
+                        )
+                    })
+                }
+            ).then(() => {
+                this.initMutationObservers();
+            })
+
         })
     }
 
