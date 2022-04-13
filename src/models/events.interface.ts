@@ -2,6 +2,7 @@ export interface Event {
     data: EventData;
     created_at: number;
     hash: string;
+    id: number;
 }
 
 export interface EventData {

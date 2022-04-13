@@ -1,92 +1,91 @@
 import * as queryString from 'query-string';
-import { Event, EventData } from '../models/events.interface';
-import { getLocalStorage, hash, setLocalStorage, updateLocalStorage } from './helper';
-import { defaultClearPeriod, localStorageKey } from './guardian';
+import {Event, EventData} from '../models/events.interface';
+import {connectDB, hash} from './helper';
+import {IDBPDatabase} from "idb";
 
 const utmSuffix = '_last';
-const previousElementTTL = 10800000;
 
 const utmSourceListener = () => {
     const key = 'utm_source';
-    const lastUTM = getLocalStorage(key + utmSuffix);
     const utmParam = queryString.parse(location.search)[key];
+
     if (utmParam && typeof utmParam === 'string') {
-        setLocalStorage(key + utmSuffix, utmParam, previousElementTTL);
-        onUrlChange(key, lastUTM, utmParam);
+        connectDB().then(async (db) => onUrlChange(key, utmParam, db))
     }
 };
 
 const utmMediumListener = () => {
     const key = 'utm_medium';
-    const lastUTM = getLocalStorage(key + utmSuffix);
     const utmParam = queryString.parse(location.search)[key];
     if (utmParam && typeof utmParam === 'string') {
-        setLocalStorage(key + utmSuffix, utmParam, previousElementTTL);
-        onUrlChange(key, lastUTM, utmParam);
+        connectDB().then(async (db) => onUrlChange(key, utmParam, db))
     }
 };
 
 const utmCampaignListener = () => {
     const key = 'utm_campaign';
-    const lastUTM = getLocalStorage(key + utmSuffix);
     const utmParam = queryString.parse(location.search)[key];
     if (utmParam && typeof utmParam === 'string') {
-        setLocalStorage(key + utmSuffix, utmParam, previousElementTTL);
-        onUrlChange(key, lastUTM, utmParam);
+        connectDB().then(async (db) => onUrlChange(key, utmParam, db))
     }
 };
 
 const utmTerm = () => {
     const key = 'utm_term';
-    const lastUTM = getLocalStorage(key + utmSuffix);
     const utmParam = queryString.parse(location.search)[key];
     if (utmParam && typeof utmParam === 'string') {
-        setLocalStorage(key + utmSuffix, utmParam, previousElementTTL);
-        onUrlChange(key, lastUTM, utmParam);
+        connectDB().then(async (db) => onUrlChange(key, utmParam, db))
     }
 };
 
 const utmContent = () => {
     const key = 'utm_content';
-    const lastUTM = getLocalStorage(key + utmSuffix);
     const utmParam = queryString.parse(location.search)[key];
     if (utmParam && typeof utmParam === 'string') {
-        setLocalStorage(key + utmSuffix, utmParam, previousElementTTL);
-        onUrlChange(key, lastUTM, utmParam);
+        connectDB().then(async (db) => onUrlChange(key, utmParam, db))
     }
 };
 
-const onUrlChange = (key: string, lastUtm: string | null, utmParam: string) => {
-    if (lastUtm && lastUtm === utmParam) {
-        return;
-    }
+async function onUrlChange(key: string, param: string, db: IDBPDatabase): Promise<unknown> {
+    const latestHash = await db.get('guardian', 'latest_hash') || 'init-hash_123'
+    const lastUtm = await db.get('guardian', key + utmSuffix)
+
     const eventData = {
         type: !lastUtm ? key + '_detected' : key + '_changed',
         action: {
-            value: utmParam
-        }
+            value: param
+        },
     } as EventData;
 
-    hash(eventData).then((h: string) => {
-        const event = {
-            hash: h,
-            created_at: new Date().getTime(),
-            data: eventData
-        } as Event;
-        updateLocalStorage(
-            localStorageKey,
-            (v: string | null) => {
-                let result = {} as Record<string, any>;
-                if (v) {
-                    const parsed = JSON.parse(v) as { expr: number; value: Record<string, any> };
-                    result = parsed.value;
-                }
-                result[h] = event;
-                return result;
-            },
-            defaultClearPeriod
-        );
-    });
-};
+    if (lastUtm && lastUtm[lastUtm.length - 1].data.action?.value &&
+        window.btoa(JSON.stringify(lastUtm[lastUtm.length - 1].data.action)) === window.btoa(JSON.stringify(eventData.action))) {
+        return Promise.resolve()
+    }
 
-export { utmSourceListener, utmMediumListener, utmCampaignListener, utmTerm, utmContent };
+    const hashedData = await hash(eventData, latestHash)
+
+    const tx = db.transaction('guardian', 'readwrite');
+    const store = tx.objectStore('guardian');
+
+    const lastIndex = await store.get('guardian_index') || 0
+
+    const currentLatestHash = await store.get('latest_hash') || 'init-hash_123';
+    if (latestHash !== currentLatestHash) {
+        await tx.done
+        return onUrlChange(key, param, db)
+    }
+
+    const event = {
+        hash: hashedData,
+        created_at: new Date().getTime(),
+        data: eventData,
+        id: lastIndex + 1
+    } as Event;
+    store.put(hashedData, 'latest_hash')
+    store.put(lastUtm ? [...lastUtm, event] : [event], key + utmSuffix)
+    store.put(lastIndex + 1, 'guardian_index')
+    await tx.done
+    return Promise.resolve();
+}
+
+export {utmSourceListener, utmMediumListener, utmCampaignListener, utmTerm, utmContent};
