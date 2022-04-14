@@ -1,5 +1,6 @@
 import {DATA_STORE, utmCampaignListener, utmContent, utmMediumListener, utmSourceListener, utmTerm} from './utm';
-import {connectDB} from "./helper";
+import {connectDB} from './helper';
+import {IDBPDatabase} from 'idb';
 
 class Guardian {
     private readonly endpoint: string
@@ -45,31 +46,34 @@ class Guardian {
         this.utmContentObserver?.observe(document, {subtree: true, childList: true});
     }
 
-    private async setSessionID(): Promise<any> {
+    private async setSessionID(): Promise<void> {
         await connectDB().then(async (db) => {
             const storedSessionID = await db.get(DATA_STORE, 'session_id')
             const ts = await db.get(DATA_STORE, 'session_id_ts')
             if (storedSessionID && ts > +new Date()) { // session id expired or we do not have session id
+                this.disconnect();
                 this.initMutationObservers();
                 return Promise.resolve()
             }
             this.disconnect();
-            return this.cleanIndexedDB().then(async () => {
-                const sessionID = await fetch(`${this.endpoint}/api/tokenizer/guardian/session`).then((resp) => resp.json()
-                ).then((respBody) => respBody?.data?.session_id)
+            return this.cleanIndexedDB().then(async (db) => {
+                    const sessionID = await fetch(`${this.endpoint}/api/tokenizer/guardian/session`).then((resp) => resp.json()
+                    ).then((respBody) => respBody?.data?.session_id)
+                    if (!sessionID) {
+                        // TODO retry or something, in this case the server is unreachable
+                        return Promise.reject()
+                    }
 
                     await db.put(DATA_STORE, sessionID, 'session_id')
                     const date = new Date()
                     await db.put(DATA_STORE, +date.setMinutes(date.getMinutes() + this.restartIntervalMinutes), 'session_id_ts')
-                    return connectDB().then((db) => {
-                        return Promise.all(
-                            [
-                                // TODO export constants
-                                db.put(DATA_STORE, sessionID, 'latest_hash'),
-                                db.put(DATA_STORE, 0, 'guardian_index')
-                            ]
-                        )
-                    })
+                    return Promise.all(
+                        [
+                            // TODO export constants
+                            db.put(DATA_STORE, sessionID, 'latest_hash'),
+                            db.put(DATA_STORE, 0, 'guardian_index')
+                        ]
+                    )
                 }
             ).then(() => {
                 this.initMutationObservers();
@@ -77,9 +81,9 @@ class Guardian {
         })
     }
 
-    private cleanIndexedDB(): Promise<void> {
+    private cleanIndexedDB(): Promise<IDBPDatabase> {
         return connectDB().then((db) => {
-            return db.clear(DATA_STORE)
+            return db.clear(DATA_STORE).then(() => db)
         })
     }
 
