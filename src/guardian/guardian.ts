@@ -2,7 +2,7 @@ import {DATA_STORE, utmCampaignListener, utmContent, utmMediumListener, utmSourc
 import {connectDB} from './helper';
 import {IDBPDatabase} from 'idb';
 
-class Guardian {
+export default class Guardian {
     private readonly endpoint: string
     private utmSourceObserver?: MutationObserver;
     private utmMediumObserver?: MutationObserver;
@@ -106,5 +106,3 @@ class Guardian {
         })
     }
 }
-
-export {Guardian};

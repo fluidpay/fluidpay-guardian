@@ -1,3 +1,5 @@
-import { Guardian } from './guardian/guardian';
-const endpoint = 'http://localhost:8001'
-new Guardian(endpoint).process()
+import Guardian from './guardian/guardian';
+
+(window as any).Guardian = Guardian
+
+export default Guardian
