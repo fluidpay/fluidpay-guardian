@@ -2,11 +2,25 @@ import {DATA_STORE, utmCampaignListener, utmContent, utmMediumListener, utmSourc
 import {connectDB} from "./helper";
 
 class Guardian {
+    private readonly endpoint: string
     private utmSourceObserver?: MutationObserver;
     private utmMediumObserver?: MutationObserver;
     private utmCampaignObserver?: MutationObserver;
     private utmTermObserver?: MutationObserver;
     private utmContentObserver?: MutationObserver;
+    private readonly restartIntervalMinutes = 30;
+
+    constructor(endpoint: string) {
+        this.endpoint = endpoint
+    }
+
+    process() {
+        this.setSessionID().then(() => {
+            setInterval(async () => {
+                await this.setSessionID()
+            }, this.restartIntervalMinutes * 1000 * 60)
+        })
+    }
 
     private initMutationObservers() {
         this.utmSourceObserver = new MutationObserver(Guardian.teeFunc(utmSourceListener));
@@ -14,6 +28,8 @@ class Guardian {
         this.utmCampaignObserver = new MutationObserver(Guardian.teeFunc(utmCampaignListener));
         this.utmTermObserver = new MutationObserver(Guardian.teeFunc(utmTerm));
         this.utmContentObserver = new MutationObserver(Guardian.teeFunc(utmContent));
+
+        this.observe()
     }
 
     private static teeFunc(func: () => void): () => void {
@@ -21,7 +37,7 @@ class Guardian {
         return func
     }
 
-    process() {
+    observe() {
         this.utmSourceObserver?.observe(document, {subtree: true, childList: true});
         this.utmMediumObserver?.observe(document, {subtree: true, childList: true});
         this.utmCampaignObserver?.observe(document, {subtree: true, childList: true});
@@ -29,16 +45,22 @@ class Guardian {
         this.utmContentObserver?.observe(document, {subtree: true, childList: true});
     }
 
-    async setSessionID(sessionID: string): Promise<any> {
+    private async setSessionID(): Promise<any> {
         await connectDB().then(async (db) => {
             const storedSessionID = await db.get(DATA_STORE, 'session_id')
-            if (storedSessionID && storedSessionID === sessionID) {
+            const ts = await db.get(DATA_STORE, 'session_id_ts')
+            if (storedSessionID && ts > +new Date()) { // session id expired or we do not have session id
                 this.initMutationObservers();
                 return Promise.resolve()
             }
             this.disconnect();
             return this.cleanIndexedDB().then(async () => {
+                const sessionID = await fetch(`${this.endpoint}/api/tokenizer/guardian/session`).then((resp) => resp.json()
+                ).then((respBody) => respBody?.data?.session_id)
+
                     await db.put(DATA_STORE, sessionID, 'session_id')
+                    const date = new Date()
+                    await db.put(DATA_STORE, +date.setMinutes(date.getMinutes() + this.restartIntervalMinutes), 'session_id_ts')
                     return connectDB().then((db) => {
                         return Promise.all(
                             [
