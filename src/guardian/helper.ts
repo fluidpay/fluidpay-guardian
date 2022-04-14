@@ -4,11 +4,9 @@ import {EventData} from '../models/events.interface';
 const dbName = 'fp-guardian-results';
 
 const hash = async (eventData: EventData, previousHash: string): Promise<string> => {
-    let forHash = jsonStringifyOrder(eventData)
-    forHash += previousHash
     const digest = await crypto.subtle.digest(
         'SHA-512',
-        new TextEncoder().encode(forHash)
+        new TextEncoder().encode(jsonStringifyOrder(eventData) + previousHash)
     );
 
     return hex(digest)
