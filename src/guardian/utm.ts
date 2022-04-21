@@ -53,10 +53,11 @@ async function onUrlChange(key: string, param: string, db: IDBPDatabase): Promis
     const lastUtm = await db.get(DATA_STORE, key);
 
     const eventData = {
-        type: !lastUtm ? key + '_detected' : key + '_changed',
         action: {
             value: param
-        }
+        },
+        created_at: new Date().getTime(),
+        type: !lastUtm ? key + '_detected' : key + '_changed'
     } as EventData;
     if (
         lastUtm &&
@@ -85,7 +86,6 @@ async function onUrlChange(key: string, param: string, db: IDBPDatabase): Promis
 
     const event = {
         hash: hashedData,
-        created_at: new Date().getTime(),
         data: eventData,
         id: lastIndex + 1
     } as Event;
