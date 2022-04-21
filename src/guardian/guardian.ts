@@ -1,6 +1,13 @@
-import {DATA_STORE, utmCampaignListener, utmContent, utmMediumListener, utmSourceListener, utmTerm} from './utm';
-import {connectDB} from './helper';
-import {IDBPDatabase} from 'idb';
+import {
+    DATA_STORE,
+    utmCampaignListener,
+    utmContent,
+    utmMediumListener,
+    utmSourceListener,
+    utmTerm
+} from './utm';
+import { connectDB } from './helper';
+import { IDBPDatabase } from 'idb';
 
 export default class Guardian {
     private readonly endpoint: string;
@@ -41,11 +48,11 @@ export default class Guardian {
     }
 
     observe() {
-        this.utmSourceObserver?.observe(document, {subtree: true, childList: true});
-        this.utmMediumObserver?.observe(document, {subtree: true, childList: true});
-        this.utmCampaignObserver?.observe(document, {subtree: true, childList: true});
-        this.utmTermObserver?.observe(document, {subtree: true, childList: true});
-        this.utmContentObserver?.observe(document, {subtree: true, childList: true});
+        this.utmSourceObserver?.observe(document, { subtree: true, childList: true });
+        this.utmMediumObserver?.observe(document, { subtree: true, childList: true });
+        this.utmCampaignObserver?.observe(document, { subtree: true, childList: true });
+        this.utmTermObserver?.observe(document, { subtree: true, childList: true });
+        this.utmContentObserver?.observe(document, { subtree: true, childList: true });
     }
 
     private async setSessionID(): Promise<void> {
@@ -61,9 +68,9 @@ export default class Guardian {
             this.disconnect();
             return this.cleanIndexedDB()
                 .then(async (db) => {
-                    const sessionID = await fetch(`${this.endpoint}/api/tokenizer/guardian/session`, {
+                    const sessionID = await fetch(`${this.endpoint}/api/guardian/session`, {
                         headers: {
-                            'Authorization': this.apiKey,
+                            Authorization: this.apiKey
                         }
                     })
                         .then((resp) => resp.json())
