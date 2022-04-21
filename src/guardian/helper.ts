@@ -1,5 +1,5 @@
-import {IDBPDatabase, openDB} from 'idb';
-import {EventData} from '../models/events.interface';
+import { IDBPDatabase, openDB } from 'idb';
+import { EventData } from '../models/events.interface';
 
 const dbName = 'fp-guardian-results';
 
@@ -9,7 +9,7 @@ const hash = async (eventData: EventData, previousHash: string): Promise<string>
         new TextEncoder().encode(jsonStringifyOrder(eventData) + previousHash)
     );
 
-    return hex(digest)
+    return hex(digest);
 };
 
 function jsonStringifyOrder(obj: unknown) {
@@ -30,25 +30,25 @@ function hex(buffer: ArrayBuffer): string {
     const view = new DataView(buffer);
     for (let i = 0; i < view.byteLength; i += 4) {
         // Using getUint32 reduces the number of iterations needed (we process 4 bytes each time)
-        const value = view.getUint32(i)
+        const value = view.getUint32(i);
         // toString(16) will give the hex representation of the number without padding
-        const stringValue = value.toString(16)
+        const stringValue = value.toString(16);
         // We use concatenation and slice for padding
-        const padding = '00000000'
-        const paddedValue = (padding + stringValue).slice(-padding.length)
+        const padding = '00000000';
+        const paddedValue = (padding + stringValue).slice(-padding.length);
         hexCodes.push(paddedValue);
     }
     // Join all the hex strings into one
 
-    return hexCodes.join("");
+    return hexCodes.join('');
 }
 
 const connectDB = (): Promise<IDBPDatabase> => {
     return openDB(dbName, 1, {
         upgrade(db: IDBPDatabase<unknown>) {
-            db.createObjectStore('guardian')
+            db.createObjectStore('guardian');
         }
-    })
+    });
 };
 
-export {hash, connectDB};
+export { hash, connectDB };

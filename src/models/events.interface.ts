@@ -7,5 +7,5 @@ export interface Event {
 
 export interface EventData {
     type: string;
-    action: Record<string, any>;
+    action: Record<string, unknown>;
 }

@@ -1,5 +1,11 @@
 import Guardian from './guardian/guardian';
 
-(window as any).Guardian = Guardian
+declare global {
+    interface Window {
+        Guardian: unknown;
+    }
+}
 
-export default Guardian
+window.Guardian = Guardian;
+
+export default Guardian;
