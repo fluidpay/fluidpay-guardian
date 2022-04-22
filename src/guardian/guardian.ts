@@ -105,7 +105,7 @@ export default class Guardian {
     }
 
     public static version(): string {
-        return '0.0.1'
+        return '0.0.1';
     }
 
     public static async getData(): Promise<{
