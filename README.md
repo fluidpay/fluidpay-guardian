@@ -17,7 +17,7 @@ Add the following code snippet into your html file's head.
 </script>
 ```
 
-### Get the collected data
+### (Optional) Get the collected data
 
 You can do it before submitting your form and attach the result to your request.
 
@@ -28,13 +28,3 @@ You can do it before submitting your form and attach the result to your request.
     });
 </script>
 ```
-
-### Guardian functions
-
-| Function                                                         | Description                                                                                          |
-| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| process(): void                                                  | Starting the guardian data collect process, by getting a session ID and collecting the data locally. |
-| observe(): void                                                  | Start listen on pre-defined events and event changes. (Part of the process method)                   |
-| observe(): void                                                  | Stops the event listening and recording.                                                             |
-| static version(): string                                         | Returns the current guardian version.                                                                |
-| static getData(): Promise<{events: Event[]; session_id: string}> | Returns with the collected data, ordered by the creation time. You can verify and save it.           |
