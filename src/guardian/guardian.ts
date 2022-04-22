@@ -104,6 +104,10 @@ export default class Guardian {
         this.utmContent?.disconnect();
     }
 
+    public static version(): string {
+        return '0.0.1'
+    }
+
     public static async getData(): Promise<{
         events: Event[];
         session_id: string;
