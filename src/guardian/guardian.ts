@@ -96,7 +96,7 @@ export default class Guardian {
         });
     }
 
-    private disconnect() {
+    disconnect() {
         this.utmSource?.disconnect();
         this.utmMedium?.disconnect();
         this.utmCampaign?.disconnect();

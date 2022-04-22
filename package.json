@@ -1,7 +1,21 @@
 {
-    "name": "guardian",
-    "private": true,
-    "version": "0.0.0",
+    "name": "@gwservices/guardian",
+    "private": false,
+    "version": "0.0.1",
+    "main": "dist/guardian.umd.js",
+    "files": [
+        "dist",
+        "src"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/fluidpay/fluidpay-guardian.git"
+    },
+    "license": "UNLICENSED",
+    "bugs": {
+        "url": "https://github.com/fluidpay/fluidpay-guardian/issues"
+    },
+    "homepage": "https://github.com/fluidpay/fluidpay-guardian#readme",
     "scripts": {
         "build": "tsc && vite build",
         "changes:add": "npx changeset",
