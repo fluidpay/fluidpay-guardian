@@ -1,92 +1,180 @@
 import * as queryString from 'query-string';
 import { Event, EventData } from '../models/events.interface';
-import { getLocalStorage, hash, setLocalStorage, updateLocalStorage } from './helper';
-import { defaultClearPeriod, localStorageKey } from './guardian';
+import { connectDB, hash, teeFunc } from './helper';
+import { IDBPDatabase } from 'idb';
+import { Observable, EventProcessor } from '../models/guardian.interface';
 
-const utmSuffix = '_last';
-const previousElementTTL = 10800000;
+const DATA_STORE = 'guardian';
+const GUARDIAN_INDEX_KEY = 'guardian_index';
+const GUARDIAN_LATEST_HASH_KEY = 'latest_hash';
 
-const utmSourceListener = () => {
-    const key = 'utm_source';
-    const lastUTM = getLocalStorage(key + utmSuffix);
-    const utmParam = queryString.parse(location.search)[key];
-    if (utmParam && typeof utmParam === 'string') {
-        setLocalStorage(key + utmSuffix, utmParam, previousElementTTL);
-        onUrlChange(key, lastUTM, utmParam);
+class BaseObservable implements Observable {
+    private observer?: MutationObserver;
+    private readonly target: Node;
+
+    constructor(target: Node) {
+        this.target = target;
     }
-};
 
-const utmMediumListener = () => {
-    const key = 'utm_medium';
-    const lastUTM = getLocalStorage(key + utmSuffix);
-    const utmParam = queryString.parse(location.search)[key];
-    if (utmParam && typeof utmParam === 'string') {
-        setLocalStorage(key + utmSuffix, utmParam, previousElementTTL);
-        onUrlChange(key, lastUTM, utmParam);
+    init(listener: () => void) {
+        this.observer = new MutationObserver(teeFunc(listener));
     }
-};
 
-const utmCampaignListener = () => {
-    const key = 'utm_campaign';
-    const lastUTM = getLocalStorage(key + utmSuffix);
-    const utmParam = queryString.parse(location.search)[key];
-    if (utmParam && typeof utmParam === 'string') {
-        setLocalStorage(key + utmSuffix, utmParam, previousElementTTL);
-        onUrlChange(key, lastUTM, utmParam);
+    observe(): void {
+        this.observer?.observe(this.target, { subtree: true, childList: true });
     }
-};
 
-const utmTerm = () => {
-    const key = 'utm_term';
-    const lastUTM = getLocalStorage(key + utmSuffix);
-    const utmParam = queryString.parse(location.search)[key];
-    if (utmParam && typeof utmParam === 'string') {
-        setLocalStorage(key + utmSuffix, utmParam, previousElementTTL);
-        onUrlChange(key, lastUTM, utmParam);
+    disconnect(): void {
+        this.observer?.disconnect();
     }
-};
+}
 
-const utmContent = () => {
-    const key = 'utm_content';
-    const lastUTM = getLocalStorage(key + utmSuffix);
-    const utmParam = queryString.parse(location.search)[key];
-    if (utmParam && typeof utmParam === 'string') {
-        setLocalStorage(key + utmSuffix, utmParam, previousElementTTL);
-        onUrlChange(key, lastUTM, utmParam);
+class UtmSource extends BaseObservable implements EventProcessor {
+    constructor() {
+        super(document);
+        super.init(this.listen);
     }
-};
 
-const onUrlChange = (key: string, lastUtm: string | null, utmParam: string) => {
-    if (lastUtm && lastUtm === utmParam) {
-        return;
-    }
-    const eventData = {
-        type: !lastUtm ? key + '_detected' : key + '_changed',
-        action: {
-            value: utmParam
+    listen(): void {
+        const key = 'utm_source';
+        const utmParam = queryString.parse(location.search)[key];
+
+        if (utmParam && typeof utmParam === 'string') {
+            connectDB().then(async (db) => onUrlChange(key, utmParam, db));
         }
-    } as EventData;
+    }
 
-    hash(eventData).then((h: string) => {
-        const event = {
-            hash: h,
-            created_at: new Date().getTime(),
-            data: eventData
-        } as Event;
-        updateLocalStorage(
-            localStorageKey,
-            (v: string | null) => {
-                let result = {} as Record<string, any>;
-                if (v) {
-                    const parsed = JSON.parse(v) as { expr: number; value: Record<string, any> };
-                    result = parsed.value;
-                }
-                result[h] = event;
-                return result;
-            },
-            defaultClearPeriod
-        );
-    });
+    read(db: IDBPDatabase): Promise<Event[]> {
+        return wrapPromise(db.get(DATA_STORE, 'utm_source'));
+    }
+}
+
+class UtmMedium extends BaseObservable implements EventProcessor {
+    constructor() {
+        super(document);
+        super.init(this.listen);
+    }
+
+    listen(): void {
+        const key = 'utm_medium';
+        const utmParam = queryString.parse(location.search)[key];
+        if (utmParam && typeof utmParam === 'string') {
+            connectDB().then(async (db) => onUrlChange(key, utmParam, db));
+        }
+    }
+
+    read(db: IDBPDatabase): Promise<Event[]> {
+        return wrapPromise(db.get(DATA_STORE, 'utm_medium'));
+    }
+}
+
+class UtmCampaign extends BaseObservable implements EventProcessor {
+    constructor() {
+        super(document);
+        super.init(this.listen);
+    }
+
+    listen(): void {
+        const key = 'utm_campaign';
+        const utmParam = queryString.parse(location.search)[key];
+        if (utmParam && typeof utmParam === 'string') {
+            connectDB().then(async (db) => onUrlChange(key, utmParam, db));
+        }
+    }
+
+    read(db: IDBPDatabase): Promise<Event[]> {
+        return wrapPromise(db.get(DATA_STORE, 'utm_campaign'));
+    }
+}
+
+class UtmTerm extends BaseObservable implements EventProcessor {
+    constructor() {
+        super(document);
+        super.init(this.listen);
+    }
+
+    listen(): void {
+        const key = 'utm_term';
+        const utmParam = queryString.parse(location.search)[key];
+        if (utmParam && typeof utmParam === 'string') {
+            connectDB().then(async (db) => onUrlChange(key, utmParam, db));
+        }
+    }
+
+    read(db: IDBPDatabase): Promise<Event[]> {
+        return wrapPromise(db.get(DATA_STORE, 'utm_term'));
+    }
+}
+
+class UtmContent extends BaseObservable implements EventProcessor {
+    constructor() {
+        super(document);
+        super.init(this.listen);
+    }
+
+    listen(): void {
+        const key = 'utm_content';
+        const utmParam = queryString.parse(location.search)[key];
+        if (utmParam && typeof utmParam === 'string') {
+            connectDB().then(async (db) => onUrlChange(key, utmParam, db));
+        }
+    }
+
+    read(db: IDBPDatabase): Promise<Event[]> {
+        return wrapPromise(db.get(DATA_STORE, 'utm_content'));
+    }
+}
+
+const wrapPromise = (p: Promise<Event[]>): Promise<Event[]> => {
+    return p.then((data) => data || []).catch(() => []);
 };
 
-export { utmSourceListener, utmMediumListener, utmCampaignListener, utmTerm, utmContent };
+async function onUrlChange(key: string, param: string, db: IDBPDatabase): Promise<unknown> {
+    const latestHash = await db.get(DATA_STORE, GUARDIAN_LATEST_HASH_KEY);
+    const lastUtm = await db.get(DATA_STORE, key);
+
+    const eventData = {
+        action: {
+            value: param
+        },
+        created_at: new Date().getTime(),
+        type: !lastUtm ? key + '_detected' : key + '_changed'
+    } as EventData;
+    if (
+        lastUtm &&
+        lastUtm[lastUtm.length - 1].data.action?.value &&
+        window.btoa(JSON.stringify(lastUtm[lastUtm.length - 1].data.action)) ===
+            window.btoa(JSON.stringify(eventData.action))
+    ) {
+        return Promise.resolve();
+    }
+
+    const hashedData = await hash(eventData, latestHash);
+
+    const tx = db.transaction(DATA_STORE, 'readwrite');
+    const store = tx.objectStore(DATA_STORE);
+
+    const lastIndex = await store.get(GUARDIAN_INDEX_KEY);
+    if (Number.isNaN(lastIndex)) {
+        throw new Error('invalid last index');
+    }
+
+    const currentLatestHash = await store.get(GUARDIAN_LATEST_HASH_KEY);
+    if (latestHash !== currentLatestHash) {
+        await tx.done;
+        return onUrlChange(key, param, db);
+    }
+
+    const event = {
+        hash: hashedData,
+        data: eventData,
+        id: lastIndex + 1
+    } as Event;
+    store.put(hashedData, GUARDIAN_LATEST_HASH_KEY);
+    store.put(lastUtm ? [...lastUtm, event] : [event], key);
+    store.put(lastIndex + 1, GUARDIAN_INDEX_KEY);
+    await tx.done;
+    return Promise.resolve();
+}
+
+export { DATA_STORE, UtmSource, UtmMedium, UtmCampaign, UtmTerm, UtmContent };

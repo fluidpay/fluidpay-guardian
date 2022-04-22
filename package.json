@@ -1,5 +1,5 @@
 {
-    "name": "fp-guardian",
+    "name": "guardian",
     "private": true,
     "version": "0.0.0",
     "scripts": {
@@ -35,6 +35,7 @@
         "vite": "^2.9.1"
     },
     "dependencies": {
+        "idb": "^7.0.1",
         "query-string": "^7.1.1"
     }
 }

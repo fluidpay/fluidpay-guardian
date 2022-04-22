@@ -1,3 +1,11 @@
-import { Guardian } from './guardian/guardian';
+import Guardian from './guardian/guardian';
 
-new Guardian().process();
+declare global {
+    interface Window {
+        Guardian: unknown;
+    }
+}
+
+window.Guardian = Guardian;
+
+export default Guardian;
