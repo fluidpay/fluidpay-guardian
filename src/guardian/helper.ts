@@ -1,7 +1,7 @@
 import { IDBPDatabase, openDB } from 'idb';
 import { EventData } from '../models/events.interface';
 
-const dbName = 'fp-guardian-results';
+const dbName = 'guardian-results';
 
 const hash = async (eventData: EventData, previousHash: string): Promise<string> => {
     const digest = await crypto.subtle.digest(
