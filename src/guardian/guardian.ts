@@ -1,21 +1,17 @@
-import {
-    DATA_STORE,
-    utmCampaignListener,
-    utmContent,
-    utmMediumListener,
-    utmSourceListener,
-    utmTerm
-} from './utm';
+import { DATA_STORE, UtmCampaign, UtmContent, UtmMedium, UtmSource, UtmTerm } from './utm';
 import { connectDB } from './helper';
 import { IDBPDatabase } from 'idb';
+import { EventHandler } from '../models/guardian.interface';
+import { Event } from '../models/events.interface';
 
 export default class Guardian {
+    private utmSource?: EventHandler;
+    private utmMedium?: EventHandler;
+    private utmCampaign?: EventHandler;
+    private utmTerm?: EventHandler;
+    private utmContent?: EventHandler;
+
     private readonly endpoint: string;
-    private utmSourceObserver?: MutationObserver;
-    private utmMediumObserver?: MutationObserver;
-    private utmCampaignObserver?: MutationObserver;
-    private utmTermObserver?: MutationObserver;
-    private utmContentObserver?: MutationObserver;
     private readonly restartIntervalMinutes = 30;
     private readonly apiKey: string;
 
@@ -33,26 +29,21 @@ export default class Guardian {
     }
 
     private initMutationObservers() {
-        this.utmSourceObserver = new MutationObserver(Guardian.teeFunc(utmSourceListener));
-        this.utmMediumObserver = new MutationObserver(Guardian.teeFunc(utmMediumListener));
-        this.utmCampaignObserver = new MutationObserver(Guardian.teeFunc(utmCampaignListener));
-        this.utmTermObserver = new MutationObserver(Guardian.teeFunc(utmTerm));
-        this.utmContentObserver = new MutationObserver(Guardian.teeFunc(utmContent));
+        this.utmSource = new UtmSource();
+        this.utmMedium = new UtmMedium();
+        this.utmCampaign = new UtmCampaign();
+        this.utmTerm = new UtmTerm();
+        this.utmContent = new UtmContent();
 
         this.observe();
     }
 
-    private static teeFunc(func: () => void): () => void {
-        func();
-        return func;
-    }
-
     observe() {
-        this.utmSourceObserver?.observe(document, { subtree: true, childList: true });
-        this.utmMediumObserver?.observe(document, { subtree: true, childList: true });
-        this.utmCampaignObserver?.observe(document, { subtree: true, childList: true });
-        this.utmTermObserver?.observe(document, { subtree: true, childList: true });
-        this.utmContentObserver?.observe(document, { subtree: true, childList: true });
+        this.utmSource?.observe();
+        this.utmMedium?.observe();
+        this.utmCampaign?.observe();
+        this.utmTerm?.observe();
+        this.utmContent?.observe();
     }
 
     private async setSessionID(): Promise<void> {
@@ -106,25 +97,32 @@ export default class Guardian {
     }
 
     private disconnect() {
-        this.utmSourceObserver?.disconnect();
-        this.utmMediumObserver?.disconnect();
-        this.utmCampaignObserver?.disconnect();
-        this.utmTermObserver?.disconnect();
-        this.utmContentObserver?.disconnect();
+        this.utmSource?.disconnect();
+        this.utmMedium?.disconnect();
+        this.utmCampaign?.disconnect();
+        this.utmTerm?.disconnect();
+        this.utmContent?.disconnect();
     }
 
-    // FIXME this is here for testing
-    public static showResult() {
-        connectDB().then(async (db) => {
-            const keys = (await db.getAllKeys(DATA_STORE)).filter(
-                (k) => !['guardian_index', 'latest_hash', 'session_id'].includes(k as string)
-            );
-            const joinedEvents = await Promise.all(
-                keys.flatMap(async (key) => {
-                    return await db.get(DATA_STORE, key);
-                })
-            );
-            console.log(joinedEvents.flatMap((e) => e).sort((a, b) => (a.id > b.id ? 1 : -1)));
+    public static async getData(): Promise<{
+        events: Event[];
+        session_id: string;
+    }> {
+        return connectDB().then(async (db) => {
+            const joinedEvents: Event[] = [];
+            joinedEvents.push(...(await new UtmSource().read(db)));
+            joinedEvents.push(...(await new UtmMedium().read(db)));
+            joinedEvents.push(...(await new UtmCampaign().read(db)));
+            joinedEvents.push(...(await new UtmTerm().read(db)));
+            joinedEvents.push(...(await new UtmContent().read(db)));
+
+            const sessionID = (await db.get(DATA_STORE, 'session_id')) || '';
+            return {
+                events: joinedEvents.sort((a: { id: number }, b: { id: number }) =>
+                    a.id > b.id ? 1 : -1
+                ),
+                session_id: sessionID
+            };
         });
     }
 }

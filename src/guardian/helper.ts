@@ -51,4 +51,9 @@ const connectDB = (): Promise<IDBPDatabase> => {
     });
 };
 
-export { hash, connectDB };
+const teeFunc = (func: () => void): (() => void) => {
+    func();
+    return func;
+};
+
+export { hash, connectDB, teeFunc };

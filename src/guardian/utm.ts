@@ -1,51 +1,132 @@
 import * as queryString from 'query-string';
 import { Event, EventData } from '../models/events.interface';
-import { connectDB, hash } from './helper';
+import { connectDB, hash, teeFunc } from './helper';
 import { IDBPDatabase } from 'idb';
+import { Observable, EventProcessor } from '../models/guardian.interface';
 
 const DATA_STORE = 'guardian';
 const GUARDIAN_INDEX_KEY = 'guardian_index';
 const GUARDIAN_LATEST_HASH_KEY = 'latest_hash';
 
-const utmSourceListener = () => {
-    const key = 'utm_source';
-    const utmParam = queryString.parse(location.search)[key];
+class BaseObservable implements Observable {
+    private observer?: MutationObserver;
+    private readonly target: Node;
 
-    if (utmParam && typeof utmParam === 'string') {
-        connectDB().then(async (db) => onUrlChange(key, utmParam, db));
+    constructor(target: Node) {
+        this.target = target;
     }
-};
 
-const utmMediumListener = () => {
-    const key = 'utm_medium';
-    const utmParam = queryString.parse(location.search)[key];
-    if (utmParam && typeof utmParam === 'string') {
-        connectDB().then(async (db) => onUrlChange(key, utmParam, db));
+    init(listener: () => void) {
+        this.observer = new MutationObserver(teeFunc(listener));
     }
-};
 
-const utmCampaignListener = () => {
-    const key = 'utm_campaign';
-    const utmParam = queryString.parse(location.search)[key];
-    if (utmParam && typeof utmParam === 'string') {
-        connectDB().then(async (db) => onUrlChange(key, utmParam, db));
+    observe(): void {
+        this.observer?.observe(this.target, { subtree: true, childList: true });
     }
-};
 
-const utmTerm = () => {
-    const key = 'utm_term';
-    const utmParam = queryString.parse(location.search)[key];
-    if (utmParam && typeof utmParam === 'string') {
-        connectDB().then(async (db) => onUrlChange(key, utmParam, db));
+    disconnect(): void {
+        this.observer?.disconnect();
     }
-};
+}
 
-const utmContent = () => {
-    const key = 'utm_content';
-    const utmParam = queryString.parse(location.search)[key];
-    if (utmParam && typeof utmParam === 'string') {
-        connectDB().then(async (db) => onUrlChange(key, utmParam, db));
+class UtmSource extends BaseObservable implements EventProcessor {
+    constructor() {
+        super(document);
+        super.init(this.listen);
     }
+
+    listen(): void {
+        const key = 'utm_source';
+        const utmParam = queryString.parse(location.search)[key];
+
+        if (utmParam && typeof utmParam === 'string') {
+            connectDB().then(async (db) => onUrlChange(key, utmParam, db));
+        }
+    }
+
+    read(db: IDBPDatabase): Promise<Event[]> {
+        return wrapPromise(db.get(DATA_STORE, 'utm_source'));
+    }
+}
+
+class UtmMedium extends BaseObservable implements EventProcessor {
+    constructor() {
+        super(document);
+        super.init(this.listen);
+    }
+
+    listen(): void {
+        const key = 'utm_medium';
+        const utmParam = queryString.parse(location.search)[key];
+        if (utmParam && typeof utmParam === 'string') {
+            connectDB().then(async (db) => onUrlChange(key, utmParam, db));
+        }
+    }
+
+    read(db: IDBPDatabase): Promise<Event[]> {
+        return wrapPromise(db.get(DATA_STORE, 'utm_medium'));
+    }
+}
+
+class UtmCampaign extends BaseObservable implements EventProcessor {
+    constructor() {
+        super(document);
+        super.init(this.listen);
+    }
+
+    listen(): void {
+        const key = 'utm_campaign';
+        const utmParam = queryString.parse(location.search)[key];
+        if (utmParam && typeof utmParam === 'string') {
+            connectDB().then(async (db) => onUrlChange(key, utmParam, db));
+        }
+    }
+
+    read(db: IDBPDatabase): Promise<Event[]> {
+        return wrapPromise(db.get(DATA_STORE, 'utm_campaign'));
+    }
+}
+
+class UtmTerm extends BaseObservable implements EventProcessor {
+    constructor() {
+        super(document);
+        super.init(this.listen);
+    }
+
+    listen(): void {
+        const key = 'utm_term';
+        const utmParam = queryString.parse(location.search)[key];
+        if (utmParam && typeof utmParam === 'string') {
+            connectDB().then(async (db) => onUrlChange(key, utmParam, db));
+        }
+    }
+
+    read(db: IDBPDatabase): Promise<Event[]> {
+        return wrapPromise(db.get(DATA_STORE, 'utm_term'));
+    }
+}
+
+class UtmContent extends BaseObservable implements EventProcessor {
+    constructor() {
+        super(document);
+        super.init(this.listen);
+    }
+
+    listen(): void {
+        const key = 'utm_content';
+        const utmParam = queryString.parse(location.search)[key];
+        if (utmParam && typeof utmParam === 'string') {
+            connectDB().then(async (db) => onUrlChange(key, utmParam, db));
+        }
+    }
+
+    read(db: IDBPDatabase): Promise<Event[]> {
+        return wrapPromise(db.get(DATA_STORE, 'utm_content'));
+    }
+}
+
+const wrapPromise = (p: Promise<Event[]>): Promise<Event[]> => {
+    return p.then((data) => data || []).catch(() => []);
 };
 
 async function onUrlChange(key: string, param: string, db: IDBPDatabase): Promise<unknown> {
@@ -96,11 +177,4 @@ async function onUrlChange(key: string, param: string, db: IDBPDatabase): Promis
     return Promise.resolve();
 }
 
-export {
-    DATA_STORE,
-    utmSourceListener,
-    utmMediumListener,
-    utmCampaignListener,
-    utmTerm,
-    utmContent
-};
+export { DATA_STORE, UtmSource, UtmMedium, UtmCampaign, UtmTerm, UtmContent };
