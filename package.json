@@ -2,11 +2,23 @@
     "name": "@gwservices/guardian",
     "private": false,
     "version": "0.0.1",
-    "main": "dist/guardian.umd.js",
+    "module": "./dist/guardian.es.js",
+    "main": "./dist/guardian.umd.js",
+    "types": "./dist/main.d.ts",
     "files": [
         "dist",
         "src"
     ],
+    "publishConfig": {
+        "access": "public",
+        "registry": "https://registry.npmjs.org/"
+    },
+    "exports": {
+        ".": {
+            "import": "./dist/guardian.es.js",
+            "require": "./dist/guardian.umd.js"
+        }
+    },
     "repository": {
         "type": "git",
         "url": "git+https://github.com/fluidpay/fluidpay-guardian.git"
@@ -17,7 +29,7 @@
     },
     "homepage": "https://github.com/fluidpay/fluidpay-guardian#readme",
     "scripts": {
-        "build": "tsc && vite build",
+        "build": "vite build && tsc",
         "changes:add": "npx changeset",
         "dev": "vite",
         "eslint": "eslint --ext .js,.ts,.svelte .",
@@ -29,7 +41,7 @@
         "prettier:fix": "prettier --write --plugin-search-dir=. .",
         "preview": "vite preview",
         "release:package": "cd dist && npm publish",
-        "ts": "tsc --noEmit"
+        "ts": "tsc"
     },
     "devDependencies": {
         "@babel/core": "^7.17.8",
