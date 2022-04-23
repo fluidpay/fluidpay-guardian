@@ -17,6 +17,19 @@ Add the following code snippet into your html file's head.
 </script>
 ```
 
+### With import:
+
+```js
+import Guardian from '@gwservices/guardian';
+
+let guard = new Guardian('https://my_gateway_url', 'public_api_key').process();
+
+// Optional
+Guardian.getData().then((data) => {
+    console.log(data);
+});
+```
+
 ### (Optional) Get the collected data
 
 You can do it before submitting your form and attach the result to your request.
