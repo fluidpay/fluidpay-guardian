@@ -29,6 +29,26 @@ class BaseObservable implements Observable {
     }
 }
 
+class Referrer extends BaseObservable implements EventProcessor {
+    constructor() {
+        super(document);
+        super.init(this.listen);
+    }
+
+    listen(): void {
+        const key = 'referrer';
+        const referrer = document.referrer;
+
+        if (referrer && typeof referrer === 'string') {
+            connectDB().then(async (db) => onUrlChange(key, referrer, db));
+        }
+    }
+
+    read(db: IDBPDatabase): Promise<Event[]> {
+        return wrapPromise(db.get(DATA_STORE, 'referrer'));
+    }
+}
+
 class UtmSource extends BaseObservable implements EventProcessor {
     constructor() {
         super(document);
@@ -177,4 +197,13 @@ async function onUrlChange(key: string, param: string, db: IDBPDatabase): Promis
     return Promise.resolve();
 }
 
-export { DATA_STORE, UtmSource, UtmMedium, UtmCampaign, UtmTerm, UtmContent };
+export {
+    DATA_STORE,
+    BaseObservable,
+    Referrer,
+    UtmSource,
+    UtmMedium,
+    UtmCampaign,
+    UtmTerm,
+    UtmContent
+};
