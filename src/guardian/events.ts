@@ -37,7 +37,7 @@ class Referrer extends BaseObservable implements EventProcessor {
 
     listen(): void {
         const key = 'referrer';
-        const referrer = document.referrer
+        const referrer = document.referrer;
 
         if (referrer && typeof referrer === 'string') {
             connectDB().then(async (db) => onUrlChange(key, referrer, db));
@@ -197,4 +197,13 @@ async function onUrlChange(key: string, param: string, db: IDBPDatabase): Promis
     return Promise.resolve();
 }
 
-export { DATA_STORE, BaseObservable, Referrer, UtmSource, UtmMedium, UtmCampaign, UtmTerm, UtmContent };
+export {
+    DATA_STORE,
+    BaseObservable,
+    Referrer,
+    UtmSource,
+    UtmMedium,
+    UtmCampaign,
+    UtmTerm,
+    UtmContent
+};

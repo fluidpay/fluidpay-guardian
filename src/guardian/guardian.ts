@@ -1,4 +1,12 @@
-import { DATA_STORE, Referrer, UtmCampaign, UtmContent, UtmMedium, UtmSource, UtmTerm } from './events';
+import {
+    DATA_STORE,
+    Referrer,
+    UtmCampaign,
+    UtmContent,
+    UtmMedium,
+    UtmSource,
+    UtmTerm
+} from './events';
 import { connectDB } from './helper';
 import { IDBPDatabase } from 'idb';
 import { EventHandler } from '../models/guardian.interface';
