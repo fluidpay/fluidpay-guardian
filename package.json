@@ -1,7 +1,7 @@
 {
     "name": "@gwservices/guardian",
     "private": false,
-    "version": "0.0.1",
+    "version": "0.0.2",
     "module": "./dist/guardian.es.js",
     "main": "./dist/guardian.umd.js",
     "types": "./dist/main.d.ts",

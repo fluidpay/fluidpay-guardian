@@ -1,6 +1,7 @@
 import {
     DATA_STORE,
     Referrer,
+    Location,
     UtmCampaign,
     UtmContent,
     UtmMedium,
@@ -14,6 +15,7 @@ import { Event } from '../models/events.interface';
 
 export default class Guardian {
     private referrer?: EventHandler;
+    private loc?: EventHandler;
     private utmSource?: EventHandler;
     private utmMedium?: EventHandler;
     private utmCampaign?: EventHandler;
@@ -39,6 +41,7 @@ export default class Guardian {
 
     private initMutationObservers() {
         this.referrer = new Referrer();
+        // this.loc = new Location();
         this.utmSource = new UtmSource();
         this.utmMedium = new UtmMedium();
         this.utmCampaign = new UtmCampaign();
@@ -50,6 +53,7 @@ export default class Guardian {
 
     observe() {
         this.referrer?.observe();
+        this.loc?.observe();
         this.utmSource?.observe();
         this.utmMedium?.observe();
         this.utmCampaign?.observe();
@@ -109,6 +113,7 @@ export default class Guardian {
 
     disconnect() {
         this.referrer?.disconnect();
+        this.loc?.disconnect();
         this.utmSource?.disconnect();
         this.utmMedium?.disconnect();
         this.utmCampaign?.disconnect();
@@ -127,6 +132,7 @@ export default class Guardian {
         return connectDB().then(async (db) => {
             const joinedEvents: Event[] = [];
             joinedEvents.push(...(await new Referrer().read(db)));
+            joinedEvents.push(...(await new Location().read(db)));
             joinedEvents.push(...(await new UtmSource().read(db)));
             joinedEvents.push(...(await new UtmMedium().read(db)));
             joinedEvents.push(...(await new UtmCampaign().read(db)));
