@@ -38,7 +38,7 @@ class Location extends BaseObservable implements EventProcessor {
     listen(): void {
         const key = 'location';
         const loc = window.location.href;
-        
+
         if (loc && typeof loc === 'string') {
             connectDB().then(async (db) => onUrlChange(key, loc, db));
         }
