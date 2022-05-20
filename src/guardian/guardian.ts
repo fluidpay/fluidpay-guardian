@@ -41,7 +41,7 @@ export default class Guardian {
 
     private initMutationObservers() {
         this.referrer = new Referrer();
-        // this.loc = new Location();
+        this.loc = new Location();
         this.utmSource = new UtmSource();
         this.utmMedium = new UtmMedium();
         this.utmCampaign = new UtmCampaign();
