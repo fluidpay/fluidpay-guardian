@@ -3,6 +3,7 @@ import {
     Referrer,
     ScreenSize,
     WindowSize,
+    Location,
     UtmCampaign,
     UtmContent,
     UtmMedium,
@@ -18,6 +19,7 @@ export default class Guardian {
     private referrer?: EventHandler;
     private screenSize?: EventHandler;
     private windowSize?: EventHandler;
+    private loc?: EventHandler;
     private utmSource?: EventHandler;
     private utmMedium?: EventHandler;
     private utmCampaign?: EventHandler;
@@ -52,6 +54,7 @@ export default class Guardian {
         this.referrer = new Referrer();
         this.screenSize = new ScreenSize();
         this.windowSize = new WindowSize();
+        this.loc = new Location();
         this.utmSource = new UtmSource();
         this.utmMedium = new UtmMedium();
         this.utmCampaign = new UtmCampaign();
@@ -65,6 +68,7 @@ export default class Guardian {
         this.referrer?.observe();
         this.screenSize?.observe();
         this.windowSize?.observe();
+        this.loc?.observe();
         this.utmSource?.observe();
         this.utmMedium?.observe();
         this.utmCampaign?.observe();
@@ -126,6 +130,7 @@ export default class Guardian {
         this.referrer?.disconnect();
         this.screenSize?.disconnect();
         this.windowSize?.disconnect();
+        this.loc?.disconnect();
         this.utmSource?.disconnect();
         this.utmMedium?.disconnect();
         this.utmCampaign?.disconnect();
@@ -146,6 +151,7 @@ export default class Guardian {
             joinedEvents.push(...(await new Referrer().read(db)));
             joinedEvents.push(...(await new ScreenSize().read(db)));
             joinedEvents.push(...(await new WindowSize().read(db)));
+            joinedEvents.push(...(await new Location().read(db)));
             joinedEvents.push(...(await new UtmSource().read(db)));
             joinedEvents.push(...(await new UtmMedium().read(db)));
             joinedEvents.push(...(await new UtmCampaign().read(db)));
