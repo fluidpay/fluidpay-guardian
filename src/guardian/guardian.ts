@@ -27,7 +27,14 @@ export default class Guardian {
     private readonly apiKey: string;
 
     constructor(endpoint: string, apiKey: string) {
+        // Set url endpoint
         this.endpoint = endpoint;
+        // trim backslash from endpoint as it is not needed
+        if (this.endpoint.endsWith('/')) {
+            this.endpoint = this.endpoint.slice(0, -1);
+        }
+
+        // Set api key
         this.apiKey = apiKey;
     }
 
