@@ -56,4 +56,14 @@ const teeFunc = (func: () => void): (() => void) => {
     return func;
 };
 
-export { hash, connectDB, teeFunc };
+function debounce<F extends (...params: any[]) => void>(fn: F, delay: number) {
+    let timeoutID: number | null = null;
+    return function (this: any, ...args: any[]) {
+        if (timeoutID !== null) {
+            clearTimeout(timeoutID);
+        }
+        timeoutID = window.setTimeout(() => fn.apply(this, args), delay);
+    } as F;
+}
+
+export { hash, connectDB, teeFunc, debounce };

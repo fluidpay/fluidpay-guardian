@@ -1,6 +1,8 @@
 import {
     DATA_STORE,
     Referrer,
+    ScreenSize,
+    WindowSize,
     Location,
     UtmCampaign,
     UtmContent,
@@ -15,6 +17,8 @@ import { Event } from '../models/events.interface';
 
 export default class Guardian {
     private referrer?: EventHandler;
+    private screenSize?: EventHandler;
+    private windowSize?: EventHandler;
     private loc?: EventHandler;
     private utmSource?: EventHandler;
     private utmMedium?: EventHandler;
@@ -48,6 +52,8 @@ export default class Guardian {
 
     private initMutationObservers() {
         this.referrer = new Referrer();
+        this.screenSize = new ScreenSize();
+        this.windowSize = new WindowSize();
         this.loc = new Location();
         this.utmSource = new UtmSource();
         this.utmMedium = new UtmMedium();
@@ -60,6 +66,8 @@ export default class Guardian {
 
     observe() {
         this.referrer?.observe();
+        this.screenSize?.observe();
+        this.windowSize?.observe();
         this.loc?.observe();
         this.utmSource?.observe();
         this.utmMedium?.observe();
@@ -120,6 +128,8 @@ export default class Guardian {
 
     disconnect() {
         this.referrer?.disconnect();
+        this.screenSize?.disconnect();
+        this.windowSize?.disconnect();
         this.loc?.disconnect();
         this.utmSource?.disconnect();
         this.utmMedium?.disconnect();
@@ -139,6 +149,8 @@ export default class Guardian {
         return connectDB().then(async (db) => {
             const joinedEvents: Event[] = [];
             joinedEvents.push(...(await new Referrer().read(db)));
+            joinedEvents.push(...(await new ScreenSize().read(db)));
+            joinedEvents.push(...(await new WindowSize().read(db)));
             joinedEvents.push(...(await new Location().read(db)));
             joinedEvents.push(...(await new UtmSource().read(db)));
             joinedEvents.push(...(await new UtmMedium().read(db)));

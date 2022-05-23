@@ -69,6 +69,46 @@ class Referrer extends BaseObservable implements EventProcessor {
     }
 }
 
+class ScreenSize extends BaseObservable implements EventProcessor {
+    constructor() {
+        super(document);
+        super.init(this.listen);
+    }
+
+    listen(): void {
+        const key = 'screen_size';
+        const screenSize = screen.height + 'x' + screen.width;
+
+        if (screenSize && typeof screenSize === 'string') {
+            connectDB().then(async (db) => onUrlChange(key, screenSize, db));
+        }
+    }
+
+    read(db: IDBPDatabase): Promise<Event[]> {
+        return wrapPromise(db.get(DATA_STORE, 'screen_size'));
+    }
+}
+
+class WindowSize extends BaseObservable implements EventProcessor {
+    constructor() {
+        super(document);
+        super.init(this.listen);
+    }
+
+    listen(): void {
+        const key = 'window_size';
+        const windowSize = window.innerHeight + 'x' + window.innerWidth;
+
+        if (windowSize && typeof windowSize === 'string') {
+            connectDB().then(async (db) => onUrlChange(key, windowSize, db));
+        }
+    }
+
+    read(db: IDBPDatabase): Promise<Event[]> {
+        return wrapPromise(db.get(DATA_STORE, 'window_size'));
+    }
+}
+
 class UtmSource extends BaseObservable implements EventProcessor {
     constructor() {
         super(document);
@@ -222,6 +262,8 @@ export {
     BaseObservable,
     Location,
     Referrer,
+    ScreenSize,
+    WindowSize,
     UtmSource,
     UtmMedium,
     UtmCampaign,

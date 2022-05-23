@@ -5,6 +5,34 @@
         <link rel="icon" type="image/svg+xml" href="favicon.svg" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Vite App</title>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                new Guardian('http://localhost:8001/', 'pub_0wUsHIlrkK1I6ADno5MfT10UjhR').process();
+
+                setTimeout(() => {
+                    Guardian.getData().then((data) => {
+                        console.log(data);
+                    });
+                }, 200);
+            });
+
+            function updateUtmSource(event) {
+                // update utm_source in url
+                const url = new URL(window.location.href);
+                url.searchParams.set('utm_source', 'yep');
+                window.history.pushState(
+                    { html: 'great stuff', pageTitle: 'today is good' },
+                    '',
+                    url.href
+                );
+
+                setTimeout(() => {
+                    Guardian.getData().then((data) => {
+                        console.log(data);
+                    });
+                }, 200);
+            }
+        </script>
     </head>
     <body>
         <div id="app"></div>
