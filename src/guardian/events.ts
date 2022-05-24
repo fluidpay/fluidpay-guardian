@@ -216,7 +216,6 @@ class Fingerprint extends BaseObservable implements EventProcessor {
         const key = 'fingerprint';
         FingerprintJS.load().then(async (fingerprint: Agent) => {
             const fingerprintResult = await fingerprint.get();
-            console.log('fingerprintResult', fingerprintResult);
             if (fingerprintResult.visitorId) {
                 connectDB().then(async (db) => onUrlChange(key, fingerprintResult.visitorId, db));
             }
