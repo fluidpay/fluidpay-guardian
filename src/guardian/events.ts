@@ -3,8 +3,7 @@ import { Event, EventData } from '../models/events.interface';
 import { connectDB, hash, teeFunc } from './helper';
 import { IDBPDatabase } from 'idb';
 import { Observable, EventProcessor } from '../models/guardian.interface';
-import FingerprintJS, {Agent} from '@fingerprintjs/fingerprintjs';
-
+import FingerprintJS, { Agent } from '@fingerprintjs/fingerprintjs';
 
 const DATA_STORE = 'guardian';
 const GUARDIAN_INDEX_KEY = 'guardian_index';
@@ -217,11 +216,11 @@ class Fingerprint extends BaseObservable implements EventProcessor {
         const key = 'fingerprint';
         FingerprintJS.load().then(async (fingerprint: Agent) => {
             const fingerprintResult = await fingerprint.get();
-            console.log('fingerprintResult', fingerprintResult)
+            console.log('fingerprintResult', fingerprintResult);
             if (fingerprintResult.visitorId) {
                 connectDB().then(async (db) => onUrlChange(key, fingerprintResult.visitorId, db));
             }
-        })
+        });
     }
 
     read(db: IDBPDatabase): Promise<Event[]> {
