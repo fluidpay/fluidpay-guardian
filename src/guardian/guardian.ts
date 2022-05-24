@@ -8,7 +8,8 @@ import {
     UtmContent,
     UtmMedium,
     UtmSource,
-    UtmTerm
+    UtmTerm,
+    Fingerprint
 } from './events';
 import { connectDB } from './helper';
 import { IDBPDatabase } from 'idb';
@@ -25,6 +26,7 @@ export default class Guardian {
     private utmCampaign?: EventHandler;
     private utmTerm?: EventHandler;
     private utmContent?: EventHandler;
+    private fingerprint?: EventHandler;
 
     private readonly endpoint: string;
     private readonly restartIntervalMinutes = 30;
@@ -60,6 +62,7 @@ export default class Guardian {
         this.utmCampaign = new UtmCampaign();
         this.utmTerm = new UtmTerm();
         this.utmContent = new UtmContent();
+        this.fingerprint = new Fingerprint();
 
         this.observe();
     }
@@ -74,6 +77,7 @@ export default class Guardian {
         this.utmCampaign?.observe();
         this.utmTerm?.observe();
         this.utmContent?.observe();
+        this.fingerprint?.observe();
     }
 
     private async setSessionID(): Promise<void> {
@@ -136,6 +140,7 @@ export default class Guardian {
         this.utmCampaign?.disconnect();
         this.utmTerm?.disconnect();
         this.utmContent?.disconnect();
+        this.fingerprint?.disconnect();
     }
 
     public static version(): string {
@@ -157,6 +162,7 @@ export default class Guardian {
             joinedEvents.push(...(await new UtmCampaign().read(db)));
             joinedEvents.push(...(await new UtmTerm().read(db)));
             joinedEvents.push(...(await new UtmContent().read(db)));
+            joinedEvents.push(...(await new Fingerprint().read(db)));
 
             const sessionID = (await db.get(DATA_STORE, 'session_id')) || '';
             return {

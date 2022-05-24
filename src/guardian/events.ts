@@ -3,6 +3,8 @@ import { Event, EventData } from '../models/events.interface';
 import { connectDB, hash, teeFunc } from './helper';
 import { IDBPDatabase } from 'idb';
 import { Observable, EventProcessor } from '../models/guardian.interface';
+import FingerprintJS, {Agent} from '@fingerprintjs/fingerprintjs';
+
 
 const DATA_STORE = 'guardian';
 const GUARDIAN_INDEX_KEY = 'guardian_index';
@@ -205,10 +207,33 @@ class UtmContent extends BaseObservable implements EventProcessor {
     }
 }
 
+class Fingerprint extends BaseObservable implements EventProcessor {
+    constructor() {
+        super(document);
+        super.init(this.listen);
+    }
+
+    listen(): void {
+        const key = 'fingerprint';
+        FingerprintJS.load().then(async (fingerprint: Agent) => {
+            const fingerprintResult = await fingerprint.get();
+            console.log('fingerprintResult', fingerprintResult)
+            if (fingerprintResult.visitorId) {
+                connectDB().then(async (db) => onUrlChange(key, fingerprintResult.visitorId, db));
+            }
+        })
+    }
+
+    read(db: IDBPDatabase): Promise<Event[]> {
+        return wrapPromise(db.get(DATA_STORE, 'fingerprint'));
+    }
+}
+
 const wrapPromise = (p: Promise<Event[]>): Promise<Event[]> => {
     return p.then((data) => data || []).catch(() => []);
 };
 
+// onUrlChange name is deprecated should be renamed to onValueChange in the nearest future
 async function onUrlChange(key: string, param: string, db: IDBPDatabase): Promise<unknown> {
     const latestHash = await db.get(DATA_STORE, GUARDIAN_LATEST_HASH_KEY);
     const lastUtm = await db.get(DATA_STORE, key);
@@ -268,5 +293,6 @@ export {
     UtmMedium,
     UtmCampaign,
     UtmTerm,
-    UtmContent
+    UtmContent,
+    Fingerprint
 };

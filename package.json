@@ -61,6 +61,7 @@
         "vite": "^2.9.1"
     },
     "dependencies": {
+        "@fingerprintjs/fingerprintjs": "^3.3.3",
         "idb": "^7.0.1",
         "query-string": "^7.1.1"
     }
