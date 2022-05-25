@@ -1,5 +1,6 @@
 import { IDBPDatabase, openDB } from 'idb';
 import { EventData } from '../models/events.interface';
+import {DATA_STORE} from "./events";
 
 const dbName = 'guardian-results';
 
@@ -53,7 +54,15 @@ const connectDB = (): Promise<IDBPDatabase> => {
 
 const teeFunc = (func: () => void): (() => void) => {
     func();
-    return func;
+    return () => {
+        connectDB().then(async (db) => {
+            const previous = await db.get(DATA_STORE, 'url')
+            if (previous == undefined || previous !== location.href) {
+                func()
+                await db.put(DATA_STORE, location.href, 'url')
+            }
+        })
+    };
 };
 
 function debounce<F extends (...params: any[]) => void>(fn: F, delay: number) {
