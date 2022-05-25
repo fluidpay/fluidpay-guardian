@@ -17,14 +17,16 @@
         "declaration": true,
         "outDir": "dist",
         "declarationDir": "dist",
-        "emitDeclarationOnly": true
+        "emitDeclarationOnly": true,
+        "types": ["cypress"]
     },
     "include": [
         "src/**/*.interface.ts",
         "src/**/*.d.ts",
         "src/**/*.js",
         "src/**/*.ts",
-        "scripts/**/*.ts"
+        "scripts/**/*.ts",
+        "cypress/**/*.ts"
     ],
     "exclude": ["scripts/*", "src/sift/sift.js"]
 }

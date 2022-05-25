@@ -41,7 +41,13 @@
         "prettier:fix": "prettier --write --plugin-search-dir=. .",
         "preview": "vite preview",
         "release:package": "cd dist && npm publish",
-        "ts": "tsc"
+        "ts": "tsc",
+        "cypress:open": "cypress open",
+        "demo:install": "npm install --prefix demo",
+        "demo:build": "npm run --prefix demo build",
+        "demo:dev": "npm run --prefix demo dev",
+        "demo:preview": "npm run --prefix demo preview",
+        "demo:lint": "npm run --prefix demo lint"
     },
     "devDependencies": {
         "@babel/core": "^7.17.8",
@@ -52,6 +58,7 @@
         "@types/node": "^17.0.23",
         "@typescript-eslint/eslint-plugin": "^5.18.0",
         "@typescript-eslint/parser": "^5.18.0",
+        "cypress": "^9.7.0",
         "dotenv": "^16.0.0",
         "eslint": "^8.12.0",
         "eslint-config-prettier": "^8.5.0",
