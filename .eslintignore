@@ -8,6 +8,8 @@ coverage
 static
 build
 .storybook
+/demo
+/cypress
 /package
 .vitebook/.cache
 storybook-static

@@ -41,3 +41,17 @@ You can do it before submitting your form and attach the result to your request.
     });
 </script>
 ```
+
+## Running demo instance
+
+### Install dependencies
+
+```sh
+npm run demo:install
+```
+
+### Run demo dev server
+
+```sh
+npm run demo:dev
+```
