@@ -1,5 +1,5 @@
 name: End-to-end tests
-on: [pull_request, push]
+on: [pull_request]
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
@@ -11,11 +11,15 @@ jobs:
           npm install
           npm run build
           npm run demo:install
-      # Install NPM dependencies, cache them correctly
-      # and run all Cypress tests
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
           start: npm run preview, npm run demo:dev
           browser: chrome
           headless: true
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
