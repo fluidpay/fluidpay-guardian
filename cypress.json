@@ -3,5 +3,9 @@
   "video": false,
   "supportFile": false,
   "pluginsFile": false,
-  "fixturesFolder": false
+  "fixturesFolder": false,
+  "retries": {
+    "runMode": 2,
+    "openMode": 0
+  }
 }

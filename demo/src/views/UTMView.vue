@@ -2,6 +2,6 @@
 import EventList from "@/components/EventList.vue";
 </script>
 <template>
-  <h1>Home</h1>
+  <h1>UTM params</h1>
   <EventList />
 </template>
