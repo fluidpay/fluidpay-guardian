@@ -1,20 +1,20 @@
 name: End-to-end tests
-on: [pull_request, push]
+on: [ pull_request, push ]
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Prepare
-        run: |
-          npm install
-          npm run demo:install
       # Install NPM dependencies, cache them correctly
       # and run all Cypress tests
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
+          install-command: |
+            npm install
+            npm run build
+            npm run demo:install
           start: npm run preview, npm run demo:dev
           browser: chrome
           headless: true
