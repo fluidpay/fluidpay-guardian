@@ -47,7 +47,8 @@
         "demo:build": "npm run --prefix demo build",
         "demo:dev": "npm run --prefix demo dev",
         "demo:preview": "npm run --prefix demo preview",
-        "demo:lint": "npm run --prefix demo lint"
+        "demo:lint": "npm run --prefix demo lint",
+        "demo:lint:fix": "npm run --prefix demo lint:fix"
     },
     "devDependencies": {
         "@babel/core": "^7.17.8",
