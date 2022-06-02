@@ -11,6 +11,6 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
-          start: npm run preview
+          start: npm run preview, npm run demo:dev
           browser: chrome
           headless: true
