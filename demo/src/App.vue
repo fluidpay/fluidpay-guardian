@@ -1,17 +1,14 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router';
+import DemoHeader from '@/components/DemoHeader.vue';
 </script>
 
 <template>
     <header>
-        <nav>
-            <RouterLink to="/">Home</RouterLink>
-            <RouterLink to="/about">About</RouterLink>
-        </nav>
+        <DemoHeader />
     </header>
-    <main>
+    <v-container>
         <RouterView />
-    </main>
+    </v-container>
 </template>
 
 <style></style>
