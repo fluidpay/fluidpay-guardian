@@ -67,7 +67,9 @@ npm run demo:dev # this command will block your terminal, please open a new tab 
 ```
 
 ### Run e2e tests
+
 Running the cypress tests:
+
 ```sh
 npm run cypress:open # this command will start the e2e test framework
 # or
