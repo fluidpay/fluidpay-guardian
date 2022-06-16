@@ -52,6 +52,10 @@ const connectDB = (): Promise<IDBPDatabase> => {
     });
 };
 
+// teeFunc is waiting a callback function as a parameter and doing the following things with it
+// first: executing the callback function
+// then returning a wrapper callback function, which checking the url change
+// if the url has been changed, executing the parameter callback function and updating the stored url in the indexedDB
 const teeFunc = (func: () => void): (() => void) => {
     func();
     return () => {
@@ -65,14 +69,4 @@ const teeFunc = (func: () => void): (() => void) => {
     };
 };
 
-function debounce<F extends (...params: unknown[]) => void>(fn: F, delay: number) {
-    let timeoutID: number | null = null;
-    return function (this: unknown, ...args: unknown[]) {
-        if (timeoutID !== null) {
-            clearTimeout(timeoutID);
-        }
-        timeoutID = window.setTimeout(() => fn.apply(this, args), delay);
-    } as F;
-}
-
-export { hash, connectDB, teeFunc, debounce };
+export { hash, connectDB, teeFunc };
