@@ -208,7 +208,7 @@ class UtmContent extends BaseObservable implements EventProcessor {
 
 class Fingerprint extends BaseObservable implements EventProcessor {
     constructor() {
-        super(document.childNodes[0]);
+        super(document);
         super.init(this.listen);
     }
 

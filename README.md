@@ -41,3 +41,37 @@ You can do it before submitting your form and attach the result to your request.
     });
 </script>
 ```
+
+## Running demo instance
+
+### Install dependencies
+
+```sh
+npm run demo:install
+```
+
+### Run demo dev server
+
+```sh
+npm run demo:dev
+```
+
+### Run demo application
+
+```sh
+npm install # install guardian dependencies
+npm run demo:install # install the demo app dependencies
+npm run build # build guardian
+npm preview # this command will block your terminal, please open a new tab to continue; this command will provide the built guardian files
+npm run demo:dev # this command will block your terminal, please open a new tab to continue; this command will run the demo app's development server
+```
+
+### Run e2e tests
+
+Running the cypress tests:
+
+```sh
+npm run cypress:open # this command will start the e2e test framework
+# or
+npx cypress run --headless -b chrome # this command will run tests in headless mode
+```
